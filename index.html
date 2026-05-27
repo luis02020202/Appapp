@@ -69,7 +69,11 @@
   <section class="screen" id="profile">
     <div class="topbar"><button class="back" data-go="landing">‹</button><b id="pTripName">Trip</b><span style="width:38px"></span></div>
     <div class="scroll">
-      <h1>Wer bist du?</h1>
+      <div class="card mt" id="pWelcome" style="display:none;align-items:center;gap:12px">
+        <div class="avatars" id="pAvatars"></div>
+        <div id="pWelcomeText" style="font-size:14px;font-weight:700;color:var(--ink-soft);line-height:1.35"></div>
+      </div>
+      <h1 class="mt">Wer bist du?</h1>
       <p class="sub mt-s">So tauchst du im Feed auf.</p>
       <label class="lbl">Dein Name</label>
       <input class="field" id="pName" placeholder="z.B. Mia" />

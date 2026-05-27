@@ -262,10 +262,20 @@ async function joinTrip() {
   finally { $("#jSubmit").disabled = false; }
 }
 
-function startProfile(trip) {
+async function startProfile(trip) {
   state.pendingTrip = trip;
   $("#pTripName").textContent = trip.name;
   $("#pName").value = "";
+  const wrap = $("#pWelcome"), av = $("#pAvatars"); av.innerHTML = "";
+  let members = [];
+  try { members = await db.getMembers(trip.id); } catch {}
+  if (members.length) {
+    members.slice(0, 5).forEach((m) => { const d = document.createElement("div"); d.className = "av"; d.textContent = m.emoji || "🙂"; av.appendChild(d); });
+    $("#pWelcomeText").innerHTML = `Du trittst <b>„${escapeHtml(trip.name)}"</b> bei · ${members.length} ${members.length === 1 ? "Person" : "Reisende"} schon dabei`;
+    wrap.style.display = "flex";
+  } else {
+    wrap.style.display = "none";
+  }
   go("profile");
 }
 
@@ -480,11 +490,13 @@ function startClip(i) {
   recapIdx = i;
   const c = recapList[i];
   const v = $("#recapVideo");
+  v.style.opacity = "0";
+  const reveal = () => { v.style.opacity = "1"; };
   v.src = urlFor(c.storage_path);
   v.muted = !!recapAudio;
   v.currentTime = 0;
   // Falls iOS Autoplay mit Ton blockt: stumm weiterlaufen statt hängen.
-  v.play().catch(() => { v.muted = true; v.play().catch(() => {}); });
+  v.play().then(reveal).catch(() => { v.muted = true; v.play().then(reveal).catch(reveal); });
 
   $("#recapLabel").innerHTML =
     `<div class="muted" style="color:rgba(255,255,255,.85);font-weight:700">${(c.member_emoji||"🙂")} ${escapeHtml(c.member_name)} ${c.day_label ? ("· " + c.day_label) : ""}</div>` +
@@ -505,7 +517,7 @@ function endRecap() {
   $("#recapEndCard").classList.remove("hide");
 }
 function closeRecap() {
-  const v = $("#recapVideo"); v.pause(); v.removeAttribute("src"); v.load();
+  const v = $("#recapVideo"); v.pause(); v.style.opacity = "1"; v.removeAttribute("src"); v.load();
   if (recapAudio) { recapAudio.pause(); recapAudio = null; }
   $("#recapEndCard").classList.add("hide");
   $("#playerWrap").classList.remove("on");
