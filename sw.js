@@ -1,5 +1,5 @@
 // Minimaler Service Worker: App-Shell cachen, Netzwerk bevorzugen.
-const CACHE = "tripp-v1";
+const CACHE = "tripp-v2";
 const SHELL = [
   "./",
   "./index.html",
