@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#ff5e9c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="assets/icon.svg" />
+<link rel="icon" href="assets/icon.svg" />
+<style>
+:root {
+  --coral: #ff6b6b;
+  --sunset1: #ff8a5b;
+  --sunset2: #ff5e9c;
+  --purple: #7b5cff;
+  --ink: #1a1530;
+  --muted: #8a839e;
+  --bg: #f4f1fa;
+  --card: #ffffff;
+  --radius: 22px;
+  --maxw: 480px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  overscroll-behavior-y: none;
+}
+#app { max-width: var(--maxw); margin: 0 auto; min-height: 100%; position: relative; }
+
+/* screens */
+.screen { display: none; min-height: 100vh; min-height: 100dvh; flex-direction: column; }
+.screen.active { display: flex; animation: fade .3s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.scroll { flex: 1; overflow-y: auto; padding: max(20px, env(safe-area-inset-top)) 20px calc(112px + env(safe-area-inset-bottom)); }
+
+/* typography */
+h1 { font-size: 30px; line-height: 1.12; letter-spacing: -.5px; }
+h2 { font-size: 21px; letter-spacing: -.3px; }
+p.sub { color: var(--muted); font-size: 15px; line-height: 1.45; }
+.muted { color: var(--muted); font-size: 13px; }
+.center { text-align: center; }
+.mt { margin-top: 16px; } .mt-s { margin-top: 10px; } .mt-l { margin-top: 24px; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(123,92,255,.12); color: var(--purple);
+  padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+
+/* buttons */
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 16px;
+  border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; color: #fff;
+  background: linear-gradient(120deg, var(--sunset1), var(--sunset2));
+  box-shadow: 0 12px 24px -8px rgba(255,94,156,.55); transition: transform .12s ease; }
+.btn:active { transform: scale(.97); }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+.btn.ghost { background: #fff; color: var(--ink); box-shadow: 0 6px 16px -8px rgba(0,0,0,.2); border: 1.5px solid #ece7f5; }
+.btn.dark { background: var(--ink); box-shadow: none; }
+.btn.sm { padding: 10px 14px; width: auto; font-size: 14px; border-radius: 12px; }
+
+/* inputs */
+.field { width: 100%; padding: 15px 16px; border-radius: 14px; border: 1.5px solid #e6e0f1; background: #fff;
+  font-size: 16px; margin-top: 10px; color: var(--ink); }
+.field:focus { outline: none; border-color: var(--purple); }
+label.lbl { font-size: 13px; font-weight: 700; color: var(--muted); display: block; margin-top: 16px; }
+.row { display: flex; gap: 10px; }
+
+.card { background: var(--card); border-radius: var(--radius); padding: 18px;
+  box-shadow: 0 10px 30px -18px rgba(60,30,90,.35); }
+
+/* topbar */
+.topbar { display: flex; align-items: center; justify-content: space-between;
+  padding: max(14px, env(safe-area-inset-top)) 16px 8px; }
+.back { width: 38px; height: 38px; border-radius: 12px; background: #fff; display: grid; place-items: center;
+  font-size: 18px; cursor: pointer; box-shadow: 0 6px 14px -8px rgba(0,0,0,.25); border: none; }
+
+/* hero / landing */
+#landing { background: linear-gradient(160deg, #ff8a5b 0%, #ff5e9c 45%, #7b5cff 100%); color: #fff; }
+#landing .scroll { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 40px; }
+.logo { font-size: 40px; font-weight: 800; letter-spacing: -1px; }
+.hero-emoji { font-size: 64px; }
+#landing h1 { color: #fff; font-size: 36px; }
+#landing p.sub { color: rgba(255,255,255,.92); }
+#landing .btn.ghost { background: rgba(255,255,255,.16); color: #fff; border: 1.5px solid rgba(255,255,255,.35); }
+.float { position: absolute; font-size: 28px; opacity: .9; animation: floaty 5s ease-in-out infinite; }
+@keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+/* emoji picker */
+.emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; }
+.emoji-grid button { font-size: 26px; padding: 8px 0; border-radius: 12px; border: 2px solid transparent; background: #fff; cursor: pointer; }
+.emoji-grid button.on { border-color: var(--purple); background: rgba(123,92,255,.1); }
+
+/* avatars */
+.avatars { display: flex; }
+.avatars .av { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; margin-left: -10px;
+  display: grid; place-items: center; font-size: 16px; background: linear-gradient(135deg,#ffd3b6,#ff8a5b); }
+
+/* prompt card */
+.prompt { background: linear-gradient(120deg, var(--purple), var(--sunset2)); color: #fff; }
+.prompt .pill { background: rgba(255,255,255,.22); color: #fff; }
+
+/* feed */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.clip { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4; background: #ddd; cursor: pointer; }
+.clip video, .clip img { width: 100%; height: 100%; object-fit: cover; display: block; background:#222; }
+.clip .ov { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 8px; pointer-events: none; background: linear-gradient(to top, rgba(0,0,0,.55), transparent 45%); }
+.clip .meta { color:#fff; font-size: 12px; font-weight: 600; }
+.clip .play-ic { position: absolute; inset: 0; display: grid; place-items: center; z-index: 1; font-size: 34px; color: rgba(255,255,255,.9); }
+.clip .react { align-self: flex-end; background: rgba(0,0,0,.4); color:#fff; border-radius: 999px; padding: 4px 9px; font-size: 13px;
+  font-weight: 700; pointer-events: auto; cursor: pointer; border: none; backdrop-filter: blur(4px); }
+
+.empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+
+/* FAB + nav */
+.fab { position: fixed; bottom: calc(86px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+  width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(120deg, var(--sunset1), var(--sunset2));
+  border: 4px solid #fff; display: grid; place-items: center; box-shadow: 0 14px 28px -8px rgba(255,94,156,.7);
+  cursor: pointer; z-index: 40; font-size: 30px; color: #fff; }
+.fab:active { transform: translateX(-50%) scale(.93); }
+.nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: var(--maxw);
+  height: calc(72px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-top: 1px solid #eee;
+  display: flex; align-items: center; justify-content: space-around; z-index: 35; }
+.nav .item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--muted);
+  cursor: pointer; font-weight: 700; background: none; border: none; }
+.nav .item .ic { font-size: 20px; opacity: .55; }
+.nav .item.on { color: var(--purple); }
+.nav .item.on .ic { opacity: 1; }
+
+/* capture */
+.preview-box { width: 100%; aspect-ratio: 9/16; max-height: 50vh; border-radius: 18px; overflow: hidden; background:#0d0a18;
+  display: grid; place-items: center; margin-top: 14px; }
+.preview-box video { width: 100%; height: 100%; object-fit: contain; }
+.preview-box .hint { color: rgba(255,255,255,.6); font-size: 14px; padding: 20px; text-align:center; }
+.hidden { display: none !important; }
+
+/* recap player */
+#recap { background: #000; }
+#recap .scroll { padding: 0; }
+.player-wrap { position: fixed; inset: 0; max-width: var(--maxw); margin: 0 auto; background: #000; z-index: 60; display:none; }
+.player-wrap.on { display: block; }
+.player-wrap video { width: 100%; height: 100%; object-fit: contain; background:#000; }
+.player-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.player-overlay .label { position: absolute; bottom: 90px; left: 20px; right: 20px; color:#fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,.7); }
+.player-overlay .label h2 { font-size: 26px; }
+.titlecard { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; color:#fff; background: linear-gradient(160deg, #ff8a5b, #ff5e9c 50%, #7b5cff);
+  z-index: 3; transition: opacity .6s; padding: 24px; }
+.titlecard.hide { opacity: 0; pointer-events: none; }
+.player-top { position: absolute; top: max(16px, env(safe-area-inset-top)); left: 16px; right: 16px; z-index: 4;
+  display: flex; justify-content: space-between; align-items: center; pointer-events: auto; }
+.player-x { width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,.45); color:#fff; border: none;
+  font-size: 20px; cursor: pointer; }
+.progress { position: absolute; top: 0; left: 0; right: 0; display: flex; gap: 4px; padding: 8px 12px; z-index: 4; }
+.progress .seg { flex: 1; height: 3px; background: rgba(255,255,255,.3); border-radius: 2px; overflow: hidden; }
+.progress .seg > i { display:block; height: 100%; width: 0; background:#fff; }
+.progress .seg.done > i { width: 100%; }
+
+/* toggles */
+.toggle { display:flex; align-items:center; justify-content:space-between; }
+.switch { width: 46px; height: 28px; border-radius: 999px; background:#e6e0f1; position: relative; cursor:pointer; transition:.2s; flex:0 0 auto; }
+.switch.on { background: var(--purple); }
+.switch i { position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:.2s; }
+.switch.on i { left:21px; }
+
+/* config banner */
+.banner { background: #fff3cd; color: #7a5b00; border: 1px solid #ffe69c; border-radius: 14px; padding: 14px 16px;
+  margin: 14px; font-size: 14px; line-height: 1.4; }
+.banner code { background: rgba(0,0,0,.06); padding: 1px 5px; border-radius: 5px; }
+
+/* toast */
+.toast { position: fixed; bottom: calc(160px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+  background: var(--ink); color:#fff; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 600;
+  z-index: 80; opacity: 0; transition: opacity .25s; max-width: 90%; text-align:center; pointer-events:none; }
+.toast.on { opacity: 1; }
+
+/* spinner */
+.spinner { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius: 50%;
+  animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.uploadbar { height: 8px; background:#eee; border-radius: 999px; overflow: hidden; margin-top: 12px; }
+.uploadbar > i { display:block; height:100%; width:0; background: linear-gradient(90deg,var(--sunset1),var(--sunset2)); transition: width .2s; }
+
+</style>
+<title>Tripp — Urlaubsvideos mit Freunden</title>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== LANDING ===== -->
+  <section class="screen active" id="landing">
+    <div class="scroll">
+      <div class="float" style="top:60px;left:34px">✈️</div>
+      <div class="float" style="top:120px;right:40px;animation-delay:1s">🏝️</div>
+      <div class="float" style="top:220px;left:54px;animation-delay:2s">📸</div>
+      <div class="float" style="top:300px;right:60px;animation-delay:1.5s">🎬</div>
+      <div class="hero-emoji">🌴</div>
+      <div class="logo">Tripp.</div>
+      <h1 class="mt">Euer Urlaub.<br/>Ein Video.<br/>Null Schnitt.</h1>
+      <p class="sub mt-s">Sammelt mit euren Freunden Clips während der Reise — am Ende baut die App automatisch ein Video draus.</p>
+      <button class="btn mt-l" id="btnCreate">Trip erstellen 🚀</button>
+      <button class="btn ghost mt-s" id="btnJoin">Trip beitreten</button>
+    </div>
+  </section>
+
+  <!-- ===== CREATE ===== -->
+  <section class="screen" id="create">
+    <div class="topbar"><button class="back" data-go="landing">‹</button><b>Neuer Trip</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <h1>Wohin geht's?</h1>
+      <label class="lbl">Trip-Name</label>
+      <input class="field" id="cName" placeholder="z.B. Mädels-Trip Lissabon" />
+      <label class="lbl">Ziel (optional)</label>
+      <input class="field" id="cDest" placeholder="z.B. Lissabon, Portugal" />
+      <div class="row">
+        <div style="flex:1"><label class="lbl">Von</label><input class="field" id="cStart" type="date" /></div>
+        <div style="flex:1"><label class="lbl">Bis</label><input class="field" id="cEnd" type="date" /></div>
+      </div>
+      <button class="btn mt-l" id="cSubmit">Trip anlegen</button>
+    </div>
+  </section>
+
+  <!-- ===== JOIN ===== -->
+  <section class="screen" id="join">
+    <div class="topbar"><button class="back" data-go="landing">‹</button><b>Beitreten</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <h1>Hast du einen Code?</h1>
+      <p class="sub mt-s">Gib den Trip-Code ein, den du von deinen Freunden bekommen hast.</p>
+      <input class="field" id="jCode" placeholder="z.B. LISBOA" autocapitalize="characters" style="text-transform:uppercase;font-size:22px;letter-spacing:3px;text-align:center" />
+      <button class="btn mt-l" id="jSubmit">Trip suchen</button>
+    </div>
+  </section>
+
+  <!-- ===== PROFILE (name + emoji) ===== -->
+  <section class="screen" id="profile">
+    <div class="topbar"><button class="back" data-go="landing">‹</button><b id="pTripName">Trip</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <h1>Wer bist du?</h1>
+      <p class="sub mt-s">So tauchst du im Feed auf.</p>
+      <label class="lbl">Dein Name</label>
+      <input class="field" id="pName" placeholder="z.B. Mia" />
+      <label class="lbl">Wähle dein Avatar</label>
+      <div class="emoji-grid" id="emojiGrid"></div>
+      <button class="btn mt-l" id="pSubmit">Los geht's! 🎉</button>
+    </div>
+  </section>
+
+  <!-- ===== FEED ===== -->
+  <section class="screen" id="feed">
+    <div class="scroll">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div class="muted" style="font-weight:700" id="feedDay">DEINE REISE</div>
+          <h1 id="feedTitle" style="font-size:26px">Trip</h1>
+        </div>
+        <div class="avatars" id="feedAvatars"></div>
+      </div>
+
+      <div class="card prompt mt">
+        <span class="pill">⏰ TAGES-CHALLENGE</span>
+        <h2 class="mt-s" id="challengeText">Fang den Sonnenuntergang ein 🌅</h2>
+        <p class="mt-s" style="opacity:.9;font-size:14px" id="challengeSub">Tippe ＋ und film deinen Moment.</p>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between" class="mt-l">
+        <h2>Die Reise bisher</h2>
+        <button class="btn ghost sm" id="btnRefresh">↻</button>
+      </div>
+
+      <div class="grid" id="clipGrid"></div>
+      <div class="empty hidden" id="feedEmpty">Noch keine Clips — sei die*der Erste! Tippe ＋</div>
+
+      <button class="btn mt-l" id="btnRecap">✨ Recap-Video erstellen</button>
+      <button class="btn ghost mt-s sm" id="btnShare" style="width:100%">🔗 Freunde einladen (Code <b id="shareCode"></b>)</button>
+    </div>
+    <button class="fab" id="fab">＋</button>
+    <div class="nav">
+      <button class="item on"><span class="ic">🏠</span>Feed</button>
+      <button class="item" id="navRecap"><span class="ic">🎬</span>Recap</button>
+      <span style="width:64px"></span>
+      <button class="item" id="navShare"><span class="ic">🔗</span>Einladen</button>
+      <button class="item" id="navLeave"><span class="ic">🚪</span>Wechseln</button>
+    </div>
+  </section>
+
+  <!-- ===== CAPTURE ===== -->
+  <section class="screen" id="capture">
+    <div class="topbar"><button class="back" data-go="feed">‹</button><b>Clip hinzufügen</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <input type="file" id="fileCam" accept="video/*" capture="environment" class="hidden" />
+      <input type="file" id="fileGal" accept="video/*" class="hidden" />
+
+      <div id="captureChoice">
+        <div class="card prompt"><span class="pill">🌅 Heutige Challenge</span><h2 class="mt-s" id="capChallenge">Sonnenuntergang</h2></div>
+        <button class="btn mt-l" id="btnRecord">🎥 Jetzt aufnehmen</button>
+        <button class="btn ghost mt-s" id="btnGallery">🖼️ Aus Galerie wählen</button>
+        <p class="muted center mt-l">Tipp: kurze Clips (5–20 Sek.) machen das beste Recap.</p>
+      </div>
+
+      <div id="captureUpload" class="hidden">
+        <div class="preview-box"><video id="capPreview" playsinline muted controls></video></div>
+        <label class="lbl">Kurze Beschreibung (optional)</label>
+        <input class="field" id="capCaption" placeholder="z.B. Sonnenuntergang am Strand" />
+        <div class="uploadbar hidden" id="capBar"><i></i></div>
+        <button class="btn mt-l" id="btnUpload">Hochladen & teilen</button>
+        <button class="btn ghost mt-s" id="btnRetake">Anderen Clip wählen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RECAP ===== -->
+  <section class="screen" id="recap">
+    <div class="topbar"><button class="back" data-go="feed">‹</button><b>Recap-Video</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <div class="card center">
+        <div style="font-size:54px">🎞️</div>
+        <h2 class="mt-s" id="recapTitle">Euer Reise-Video</h2>
+        <p class="sub mt-s" id="recapInfo">Alle Clips werden zu einem Video zusammengefügt.</p>
+      </div>
+
+      <div class="card mt toggle">
+        <div><b>Musik</b><div class="muted">Hintergrundmusik (falls hinterlegt)</div></div>
+        <div class="switch on" id="swMusic"><i></i></div>
+      </div>
+      <div class="card mt toggle">
+        <div><b>Titelkarte</b><div class="muted">Intro mit Trip-Name zeigen</div></div>
+        <div class="switch on" id="swTitle"><i></i></div>
+      </div>
+
+      <button class="btn mt-l" id="btnPlayRecap">▶ Recap abspielen</button>
+      <p class="muted center mt">Spielt alle Clips automatisch hintereinander ab — wie ein fertiges Video.</p>
+    </div>
+  </section>
+
+  <!-- ===== RECAP PLAYER (overlay) ===== -->
+  <div class="player-wrap" id="playerWrap">
+    <div class="progress" id="playerProgress"></div>
+    <div class="player-top">
+      <button class="player-x" id="playerClose">✕</button>
+      <button class="player-x" id="playerPause" style="width:auto;padding:0 14px;border-radius:20px">⏸</button>
+    </div>
+    <video id="recapVideo" playsinline></video>
+    <div class="player-overlay">
+      <div class="label" id="recapLabel"></div>
+    </div>
+    <div class="titlecard" id="recapTitleCard">
+      <div style="font-size:60px">🌴</div>
+      <h1 id="tcName" style="color:#fff;font-size:34px;margin-top:8px"></h1>
+      <p id="tcSub" style="opacity:.92;margin-top:6px"></p>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>window.TRIPP_CONFIG={SUPABASE_URL:"DEINE_PROJECT_URL_HIER",SUPABASE_ANON_KEY:"DEIN_ANON_KEY_HIER"};</script>
+<script>
+/* ============================================================
+   Tripp - App-Logik
+   Zwei Backends hinter EINER db-Schnittstelle:
+   - Supabase (echtes Teilen) wenn config.js ausgefüllt ist
+   - Lokaler Demo-Modus (IndexedDB + localStorage) sonst,
+     damit man die App sofort ohne Setup testen kann.
+   ============================================================ */
+
+const CFG = window.TRIPP_CONFIG || {};
+const CONFIGURED =
+  CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY &&
+  !CFG.SUPABASE_URL.includes("DEINE_") && !CFG.SUPABASE_ANON_KEY.includes("DEIN_");
+
+/* ---------- Helpers ---------- */
+const $ = (s) => document.querySelector(s);
+const $ = (s) => [...document.querySelectorAll(s)];
+const EMOJIS = ["🦊","🐨","🐧","🐱","🐶","🦁","🐼","🐸","🐵","🦄","🐯","🐮","🦉","🐙","🦖","😎","🥳","👑"];
+const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const SESSION_KEY = "tripp_session";
+
+let state = { trip: null, members: [], clips: [], pendingTrip: null, selectedEmoji: EMOJIS[0] };
+let db = null; // wird in init() gesetzt
+
+function go(id) {
+  $(".screen").forEach((s) => s.classList.remove("active"));
+  const el = document.getElementById(id);
+  el.classList.add("active");
+  const sc = el.querySelector(".scroll");
+  if (sc) sc.scrollTop = 0;
+}
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("on"), 2600);
+}
+function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+function loadSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } }
+function clearSession() { localStorage.removeItem(SESSION_KEY); }
+function randomCode(n = 5) {
+  let c = ""; for (let i = 0; i < n; i++) c += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
+  return c;
+}
+function uid() { return (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(16).slice(2)); }
+function shareLink(code) { return location.origin + location.pathname + "#join=" + code; }
+function fileExt(file) {
+  const m = (file.name || "").match(/\.([a-z0-9]+)$/i);
+  if (m) return m[1].toLowerCase();
+  if ((file.type || "").includes("quicktime")) return "mov";
+  return "mp4";
+}
+function dayLabel(trip) {
+  if (trip && trip.start_date) {
+    const start = new Date(trip.start_date + "T00:00:00");
+    const diff = Math.floor((Date.now() - start.getTime()) / 86400000) + 1;
+    if (diff >= 1) return "Tag " + diff;
+  }
+  return new Date().toLocaleDateString("de-DE", { day: "numeric", month: "short" });
+}
+function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
+
+/* ---------- URL-Cache (Supabase: public URL, lokal: object URL) ---------- */
+const urlCache = new Map();
+async function ensureUrl(path) {
+  if (!urlCache.has(path)) urlCache.set(path, await db.fileUrl(path));
+  return urlCache.get(path);
+}
+function urlFor(path) { return urlCache.get(path) || ""; }
+
+/* ============================================================
+   Lokales Demo-Backend (IndexedDB für Videos, localStorage für Daten)
+   ============================================================ */
+function idbOpen() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open("tripp", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("files");
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbPut(key, val) {
+  const d = await idbOpen();
+  return new Promise((res, rej) => {
+    const tx = d.transaction("files", "readwrite");
+    tx.objectStore("files").put(val, key);
+    tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error);
+  });
+}
+async function idbGet(key) {
+  const d = await idbOpen();
+  return new Promise((res, rej) => {
+    const tx = d.transaction("files", "readonly");
+    const rq = tx.objectStore("files").get(key);
+    rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error);
+  });
+}
+const LS = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } },
+  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); },
+};
+const T_TRIPS = "tripp_l_trips", T_MEM = "tripp_l_members", T_CLIPS = "tripp_l_clips";
+
+const LocalBackend = {
+  async getTripByCode(code) { return LS.get(T_TRIPS).find((t) => t.code === code) || null; },
+  async getTrip(id) { return LS.get(T_TRIPS).find((t) => t.id === id) || null; },
+  async createTrip(f) {
+    const trips = LS.get(T_TRIPS);
+    let code; do { code = randomCode(); } while (trips.some((t) => t.code === code));
+    const trip = { id: uid(), code, created_at: new Date().toISOString(), ...f };
+    trips.push(trip); LS.set(T_TRIPS, trips); return trip;
+  },
+  async addMember(m) {
+    const a = LS.get(T_MEM); const mem = { id: uid(), created_at: new Date().toISOString(), ...m };
+    a.push(mem); LS.set(T_MEM, a); return mem;
+  },
+  async getMembers(tripId) {
+    return LS.get(T_MEM).filter((m) => m.trip_id === tripId).sort((x, y) => x.created_at.localeCompare(y.created_at));
+  },
+  async addClip(c) {
+    const a = LS.get(T_CLIPS); const clip = { id: uid(), reactions: 0, created_at: new Date().toISOString(), ...c };
+    a.push(clip); LS.set(T_CLIPS, a); return clip;
+  },
+  async getClips(tripId) {
+    return LS.get(T_CLIPS).filter((c) => c.trip_id === tripId).sort((x, y) => x.created_at.localeCompare(y.created_at));
+  },
+  async addReaction(id, newCount) {
+    const a = LS.get(T_CLIPS); const c = a.find((x) => x.id === id);
+    if (c) { c.reactions = newCount; LS.set(T_CLIPS, a); }
+  },
+  async uploadFile(path, file) { await idbPut(path, file); },
+  async fileUrl(path) { const b = await idbGet(path); return b ? URL.createObjectURL(b) : ""; },
+};
+
+/* ============================================================
+   Supabase-Backend
+   ============================================================ */
+function makeSupabaseBackend(sb) {
+  return {
+    async getTripByCode(code) {
+      const { data } = await sb.from("trips").select("*").eq("code", code).maybeSingle();
+      return data || null;
+    },
+    async getTrip(id) {
+      const { data } = await sb.from("trips").select("*").eq("id", id).maybeSingle();
+      return data || null;
+    },
+    async createTrip(f) {
+      for (let i = 0; i < 6; i++) {
+        const code = randomCode();
+        const { data, error } = await sb.from("trips").insert({ code, ...f }).select().single();
+        if (!error) return data;
+        if (error.code !== "23505") throw error; // 23505 = unique violation -> neuer Code
+      }
+      throw new Error("Konnte keinen eindeutigen Code erzeugen");
+    },
+    async addMember(m) {
+      const { data, error } = await sb.from("members").insert(m).select().single();
+      if (error) throw error; return data;
+    },
+    async getMembers(tripId) {
+      const { data } = await sb.from("members").select("*").eq("trip_id", tripId).order("created_at");
+      return data || [];
+    },
+    async addClip(c) {
+      const { data, error } = await sb.from("clips").insert(c).select().single();
+      if (error) throw error; return data;
+    },
+    async getClips(tripId) {
+      const { data } = await sb.from("clips").select("*").eq("trip_id", tripId).order("created_at");
+      return data || [];
+    },
+    async addReaction(id, newCount) {
+      const { error } = await sb.rpc("add_reaction", { clip_id: id });
+      if (error) await sb.from("clips").update({ reactions: newCount }).eq("id", id);
+    },
+    async uploadFile(path, file) {
+      const { error } = await sb.storage.from("clips").upload(path, file, {
+        contentType: file.type || "video/mp4", upsert: false,
+      });
+      if (error) throw error;
+    },
+    async fileUrl(path) { return sb.storage.from("clips").getPublicUrl(path).data.publicUrl; },
+  };
+}
+
+/* ============================================================
+   Init / Routing
+   ============================================================ */
+async function init() {
+  buildEmojiGrid();
+  wireEvents();
+  registerSW();
+
+  if (CONFIGURED) {
+    const mod = await import("https://esm.sh/@supabase/supabase-js@2");
+    db = makeSupabaseBackend(mod.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY));
+  } else {
+    db = LocalBackend;
+    showDemoBanner();
+  }
+  await route();
+}
+
+function showDemoBanner() {
+  const b = document.createElement("div");
+  b.className = "banner";
+  b.innerHTML =
+    "🧪 <b>Demo-Modus.</b> Die App läuft lokal auf diesem Gerät — du kannst alles ausprobieren, " +
+    "aber Clips werden noch nicht mit Freunden geteilt. Für echtes Teilen: <code>config.js</code> ausfüllen (siehe <code>SETUP.md</code>).";
+  $("#landing .scroll").prepend(b);
+}
+
+async function route() {
+  const m = (location.hash || "").match(/join=([A-Za-z0-9]+)/);
+  const joinCode = m ? m[1].toUpperCase() : null;
+  const session = loadSession();
+
+  try {
+    if (joinCode) {
+      if (session && session.code === joinCode && (await enterTrip(session.tripId))) return;
+      const trip = await db.getTripByCode(joinCode);
+      if (trip) { startProfile(trip); return; }
+      toast("Trip-Code nicht gefunden");
+    }
+    if (session && session.tripId) {
+      if (await enterTrip(session.tripId)) return;
+      clearSession();
+    }
+  } catch (e) { console.error(e); }
+  go("landing");
+}
+
+/* ============================================================
+   Flows
+   ============================================================ */
+async function createTrip() {
+  const name = $("#cName").value.trim();
+  if (!name) return toast("Bitte gib einen Trip-Namen ein");
+  const f = {
+    name,
+    destination: $("#cDest").value.trim() || null,
+    start_date: $("#cStart").value || null,
+    end_date: $("#cEnd").value || null,
+  };
+  $("#cSubmit").disabled = true;
+  try {
+    const trip = await db.createTrip(f);
+    startProfile(trip);
+  } catch (e) { console.error(e); toast("Fehler beim Anlegen: " + (e.message || e)); }
+  finally { $("#cSubmit").disabled = false; }
+}
+
+async function joinTrip() {
+  const code = $("#jCode").value.trim().toUpperCase();
+  if (!code) return toast("Bitte Code eingeben");
+  $("#jSubmit").disabled = true;
+  try {
+    const trip = await db.getTripByCode(code);
+    if (!trip) return toast("Kein Trip mit diesem Code gefunden");
+    startProfile(trip);
+  } catch (e) { console.error(e); toast("Fehler: " + (e.message || e)); }
+  finally { $("#jSubmit").disabled = false; }
+}
+
+function startProfile(trip) {
+  state.pendingTrip = trip;
+  $("#pTripName").textContent = trip.name;
+  $("#pName").value = "";
+  go("profile");
+}
+
+async function saveProfile() {
+  const name = $("#pName").value.trim();
+  if (!name) return toast("Bitte gib deinen Namen ein");
+  const trip = state.pendingTrip;
+  $("#pSubmit").disabled = true;
+  try {
+    await db.addMember({ trip_id: trip.id, name, emoji: state.selectedEmoji });
+    saveSession({ tripId: trip.id, code: trip.code, name, emoji: state.selectedEmoji });
+    await enterTrip(trip.id);
+  } catch (e) { console.error(e); toast("Fehler: " + (e.message || e)); }
+  finally { $("#pSubmit").disabled = false; }
+}
+
+async function enterTrip(tripId) {
+  const trip = await db.getTrip(tripId);
+  if (!trip) return false;
+  state.trip = trip;
+  state.members = await db.getMembers(tripId);
+  await loadClips();
+  renderFeed();
+  go("feed");
+  return true;
+}
+
+async function loadClips() {
+  state.clips = await db.getClips(state.trip.id);
+  await Promise.all(state.clips.map((c) => ensureUrl(c.storage_path).catch(() => {})));
+}
+
+/* ============================================================
+   Feed
+   ============================================================ */
+const CHALLENGES = ["den Sonnenuntergang 🌅","das beste Essen 🍽️","ein Gruppen-Selfie 🤳","die schönste Aussicht 🏞️","euren Lieblingsmoment ✨","etwas Lustiges 😂"];
+function todaysChallenge() {
+  const seed = (state.trip ? state.trip.code.length + new Date().getDate() : 0) % CHALLENGES.length;
+  return CHALLENGES[seed];
+}
+
+function renderFeed() {
+  const t = state.trip;
+  $("#feedTitle").textContent = t.name;
+  $("#feedDay").textContent = (t.destination ? t.destination.toUpperCase() + " · " : "") + dayLabel(t);
+  $("#shareCode").textContent = t.code;
+  $("#capChallenge").textContent = todaysChallenge();
+  $("#challengeText").textContent = "Fang ein: " + todaysChallenge();
+
+  const av = $("#feedAvatars"); av.innerHTML = "";
+  state.members.slice(0, 4).forEach((m) => {
+    const d = document.createElement("div"); d.className = "av"; d.textContent = m.emoji || "🙂"; av.appendChild(d);
+  });
+  if (state.members.length > 4) {
+    const d = document.createElement("div");
+    d.className = "av"; d.style.background = "#1a1530"; d.style.color = "#fff"; d.style.fontSize = "12px";
+    d.textContent = "+" + (state.members.length - 4); av.appendChild(d);
+  }
+  renderClips();
+}
+
+function renderClips() {
+  const grid = $("#clipGrid"); grid.innerHTML = "";
+  $("#feedEmpty").classList.toggle("hidden", state.clips.length > 0);
+  state.clips.slice().reverse().forEach((c) => grid.appendChild(clipCard(c)));
+}
+
+function clipCard(c) {
+  const wrap = document.createElement("div");
+  wrap.className = "clip";
+  const v = document.createElement("video");
+  v.src = urlFor(c.storage_path);
+  v.preload = "metadata"; v.playsInline = true; v.muted = true;
+  v.addEventListener("loadeddata", () => { try { v.currentTime = 0.4; } catch {} }, { once: true });
+  wrap.appendChild(v);
+
+  const playIc = document.createElement("div");
+  playIc.className = "play-ic"; playIc.textContent = "▶"; wrap.appendChild(playIc);
+
+  const ov = document.createElement("div"); ov.className = "ov";
+  const react = document.createElement("button");
+  react.className = "react"; react.innerHTML = "❤️ " + (c.reactions || 0);
+  react.onclick = (e) => { e.stopPropagation(); reactTo(c, react); };
+  const meta = document.createElement("div"); meta.className = "meta";
+  meta.textContent = (c.member_emoji || "🙂") + " " + (c.member_name || "?") +
+    (c.day_label ? " · " + c.day_label : "") + (c.caption ? " · " + c.caption : "");
+  ov.appendChild(react); ov.appendChild(meta); wrap.appendChild(ov);
+
+  wrap.onclick = () => {
+    if (v.paused) { v.muted = false; v.controls = true; v.play(); playIc.style.display = "none"; }
+    else { v.pause(); playIc.style.display = "grid"; }
+  };
+  return wrap;
+}
+
+async function reactTo(clip, btn) {
+  clip.reactions = (clip.reactions || 0) + 1;
+  btn.innerHTML = "❤️ " + clip.reactions;
+  try { await db.addReaction(clip.id, clip.reactions); } catch (e) { console.error(e); }
+}
+
+/* ============================================================
+   Capture / Upload
+   ============================================================ */
+let pendingFile = null;
+function showCapture() {
+  pendingFile = null;
+  $("#captureChoice").classList.remove("hidden");
+  $("#captureUpload").classList.add("hidden");
+  $("#capCaption").value = "";
+  $("#capBar").classList.add("hidden");
+  $("#capBar").querySelector("i").style.width = "0%";
+  $("#fileCam").value = ""; $("#fileGal").value = "";
+  go("capture");
+}
+function onFilePicked(file) {
+  if (!file) return;
+  pendingFile = file;
+  $("#capPreview").src = URL.createObjectURL(file);
+  $("#captureChoice").classList.add("hidden");
+  $("#captureUpload").classList.remove("hidden");
+}
+async function uploadClip() {
+  if (!pendingFile) return;
+  const session = loadSession();
+  const path = `${state.trip.id}/${Date.now()}_${randomCode(4)}.${fileExt(pendingFile)}`;
+  const bar = $("#capBar"); const fill = bar.querySelector("i");
+  bar.classList.remove("hidden");
+  $("#btnUpload").disabled = true;
+
+  let pct = 8; fill.style.width = pct + "%";
+  const tick = setInterval(() => { pct = Math.min(90, pct + 6); fill.style.width = pct + "%"; }, 350);
+  try {
+    await db.uploadFile(path, pendingFile);
+    clearInterval(tick); fill.style.width = "100%";
+    urlCache.set(path, await db.fileUrl(path));
+    await db.addClip({
+      trip_id: state.trip.id,
+      member_name: session ? session.name : null,
+      member_emoji: session ? session.emoji : null,
+      storage_path: path,
+      caption: $("#capCaption").value.trim() || null,
+      day_label: dayLabel(state.trip),
+    });
+    await loadClips(); renderClips();
+    toast("Clip geteilt! 🎬");
+    go("feed");
+  } catch (e) {
+    clearInterval(tick); fill.style.width = "0%";
+    console.error(e); toast("Upload fehlgeschlagen: " + (e.message || e));
+  } finally { $("#btnUpload").disabled = false; }
+}
+
+/* ============================================================
+   Teilen / Wechseln
+   ============================================================ */
+async function shareTrip() {
+  const t = state.trip; const link = shareLink(t.code);
+  const text = `Komm in unseren Tripp "${t.name}"! Code: ${t.code}\n${link}`;
+  if (navigator.share) { try { await navigator.share({ title: "Tripp", text, url: link }); return; } catch {} }
+  try { await navigator.clipboard.writeText(link); toast("Einladungs-Link kopiert 📋"); }
+  catch { toast("Code: " + t.code); }
+}
+function leaveTrip() {
+  if (!confirm("Trip verlassen / wechseln? Deine Clips bleiben gespeichert.")) return;
+  clearSession();
+  state = { trip: null, members: [], clips: [], pendingTrip: null, selectedEmoji: EMOJIS[0] };
+  location.hash = "";
+  go("landing");
+}
+
+/* ============================================================
+   Recap-Player
+   ============================================================ */
+function openRecap() {
+  if (!state.clips.length) return toast("Noch keine Clips für ein Recap");
+  $("#recapTitle").textContent = state.trip.name;
+  $("#recapInfo").textContent = `${state.clips.length} Clips · ${state.members.length} Reisende`;
+  go("recap");
+}
+
+let recapIdx = 0, recapAudio = null, recapList = [];
+function playRecap() {
+  recapList = state.clips.slice();
+  if (!recapList.length) return toast("Keine Clips");
+  recapIdx = 0;
+  $("#playerWrap").classList.add("on");
+
+  const prog = $("#playerProgress"); prog.innerHTML = "";
+  recapList.forEach(() => { const seg = document.createElement("div"); seg.className = "seg"; seg.innerHTML = "<i></i>"; prog.appendChild(seg); });
+
+  if (recapAudio) { recapAudio.pause(); recapAudio = null; }
+  if ($("#swMusic").classList.contains("on")) {
+    recapAudio = new Audio("assets/music.mp3");
+    recapAudio.loop = true; recapAudio.volume = 0.6;
+    recapAudio.play().catch(() => { recapAudio = null; });
+  }
+
+  const tc = $("#recapTitleCard");
+  if ($("#swTitle").classList.contains("on")) {
+    $("#tcName").textContent = state.trip.name;
+    $("#tcSub").textContent = (state.trip.destination || "") +
+      (state.trip.start_date ? " · " + new Date(state.trip.start_date).getFullYear() : "");
+    tc.classList.remove("hide");
+    setTimeout(() => { tc.classList.add("hide"); startClip(0); }, 2600);
+  } else { tc.classList.add("hide"); startClip(0); }
+}
+
+function startClip(i) {
+  if (i >= recapList.length) return endRecap();
+  recapIdx = i;
+  const c = recapList[i];
+  const v = $("#recapVideo");
+  v.src = urlFor(c.storage_path);
+  v.muted = !!recapAudio;
+  v.currentTime = 0;
+  // Falls iOS Autoplay mit Ton blockt: stumm weiterlaufen statt hängen.
+  v.play().catch(() => { v.muted = true; v.play().catch(() => {}); });
+
+  $("#recapLabel").innerHTML =
+    `<div class="muted" style="color:rgba(255,255,255,.85);font-weight:700">${(c.member_emoji||"🙂")} ${escapeHtml(c.member_name)} ${c.day_label ? ("· " + c.day_label) : ""}</div>` +
+    (c.caption ? `<h2>${escapeHtml(c.caption)}</h2>` : "");
+
+  $("#playerProgress .seg").forEach((seg, idx) => {
+    seg.classList.toggle("done", idx < i);
+    seg.querySelector("i").style.width = idx < i ? "100%" : "0%";
+  });
+}
+
+function endRecap() {
+  $("#playerProgress .seg").forEach((seg) => { seg.classList.add("done"); seg.querySelector("i").style.width = "100%"; });
+  toast("Das war euer Recap! 🎉");
+  setTimeout(closeRecap, 900);
+}
+function closeRecap() {
+  const v = $("#recapVideo"); v.pause(); v.removeAttribute("src"); v.load();
+  if (recapAudio) { recapAudio.pause(); recapAudio = null; }
+  $("#playerWrap").classList.remove("on");
+}
+function togglePause() {
+  const v = $("#recapVideo");
+  if (v.paused) { v.play(); if (recapAudio) recapAudio.play().catch(() => {}); $("#playerPause").textContent = "⏸"; }
+  else { v.pause(); if (recapAudio) recapAudio.pause(); $("#playerPause").textContent = "▶"; }
+}
+
+/* ============================================================
+   UI wiring
+   ============================================================ */
+function buildEmojiGrid() {
+  const grid = $("#emojiGrid");
+  EMOJIS.forEach((e, i) => {
+    const b = document.createElement("button");
+    b.textContent = e; if (i === 0) b.classList.add("on");
+    b.onclick = () => {
+      state.selectedEmoji = e;
+      $("#emojiGrid button").forEach((x) => x.classList.remove("on"));
+      b.classList.add("on");
+    };
+    grid.appendChild(b);
+  });
+}
+
+function wireEvents() {
+  $("[data-go]").forEach((el) => (el.onclick = () => go(el.dataset.go)));
+
+  $("#btnCreate").onclick = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const wk = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+    $("#cStart").value = today; $("#cEnd").value = wk;
+    go("create");
+  };
+  $("#btnJoin").onclick = () => go("join");
+  $("#cSubmit").onclick = createTrip;
+  $("#jSubmit").onclick = joinTrip;
+  $("#pSubmit").onclick = saveProfile;
+
+  $("#fab").onclick = showCapture;
+  $("#btnRecord").onclick = () => $("#fileCam").click();
+  $("#btnGallery").onclick = () => $("#fileGal").click();
+  $("#fileCam").onchange = (e) => onFilePicked(e.target.files[0]);
+  $("#fileGal").onchange = (e) => onFilePicked(e.target.files[0]);
+  $("#btnUpload").onclick = uploadClip;
+  $("#btnRetake").onclick = showCapture;
+
+  $("#btnRefresh").onclick = async () => { await loadClips(); renderClips(); toast("Aktualisiert"); };
+  $("#btnRecap").onclick = openRecap;
+  $("#navRecap").onclick = openRecap;
+  $("#btnShare").onclick = shareTrip;
+  $("#navShare").onclick = shareTrip;
+  $("#navLeave").onclick = leaveTrip;
+
+  $("#btnPlayRecap").onclick = playRecap;
+  $("#playerClose").onclick = closeRecap;
+  $("#playerPause").onclick = togglePause;
+  $("#recapVideo").addEventListener("ended", () => startClip(recapIdx + 1));
+
+  $("#swMusic").onclick = () => $("#swMusic").classList.toggle("on");
+  $("#swTitle").onclick = () => $("#swTitle").classList.toggle("on");
+}
+
+function registerSW() {
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+init();
+
+</script>
+</body>
+</html>
