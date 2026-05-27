@@ -2,464 +2,187 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Tripp — Urlaubsvideos mit KI</title>
-<style>
-  :root {
-    --coral: #ff6b6b;
-    --sunset1: #ff8a5b;
-    --sunset2: #ff5e9c;
-    --purple: #7b5cff;
-    --ink: #1a1530;
-    --muted: #8a839e;
-    --bg: #f4f1fa;
-    --card: #ffffff;
-    --radius: 22px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: radial-gradient(1200px 600px at 20% -10%, #ffd3b6 0%, transparent 50%),
-                radial-gradient(1200px 700px at 100% 110%, #c8b6ff 0%, transparent 55%),
-                #efe9f7;
-    color: var(--ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 24px;
-  }
-
-  /* Phone frame */
-  .phone {
-    width: 390px;
-    max-width: 100%;
-    height: 844px;
-    max-height: 92vh;
-    background: #000;
-    border-radius: 54px;
-    padding: 12px;
-    box-shadow: 0 40px 80px -20px rgba(60,30,90,.45), 0 0 0 2px rgba(255,255,255,.4) inset;
-    position: relative;
-  }
-  .screen-wrap {
-    width: 100%;
-    height: 100%;
-    background: var(--bg);
-    border-radius: 44px;
-    overflow: hidden;
-    position: relative;
-  }
-  .notch {
-    position: absolute;
-    top: 12px; left: 50%; transform: translateX(-50%);
-    width: 130px; height: 28px;
-    background: #000; border-radius: 0 0 18px 18px;
-    z-index: 50;
-  }
-
-  .screen { display: none; position: absolute; inset: 0; flex-direction: column; }
-  .screen.active { display: flex; animation: fade .35s ease; }
-  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-
-  .scroll { flex: 1; overflow-y: auto; padding: 56px 20px 100px; }
-  .scroll::-webkit-scrollbar { width: 0; }
-
-  /* Generic */
-  h1 { font-size: 30px; line-height: 1.1; letter-spacing: -.5px; }
-  h2 { font-size: 21px; letter-spacing: -.3px; }
-  p.sub { color: var(--muted); font-size: 15px; line-height: 1.45; }
-  .pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(123,92,255,.12); color: var(--purple); padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
-
-  .btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 16px; border: none; border-radius: 16px;
-    font-size: 16px; font-weight: 700; cursor: pointer; color: #fff;
-    background: linear-gradient(120deg, var(--sunset1), var(--sunset2));
-    box-shadow: 0 12px 24px -8px rgba(255,94,156,.6);
-    transition: transform .12s ease;
-  }
-  .btn:active { transform: scale(.97); }
-  .btn.ghost { background: #fff; color: var(--ink); box-shadow: 0 6px 16px -8px rgba(0,0,0,.2); border: 1.5px solid #ece7f5; }
-  .btn.dark { background: var(--ink); box-shadow: none; }
-
-  .field { width: 100%; padding: 15px 16px; border-radius: 14px; border: 1.5px solid #e6e0f1; background: #fff; font-size: 16px; margin-top: 10px; color: var(--ink); }
-  .field:focus { outline: none; border-color: var(--purple); }
-  label.lbl { font-size: 13px; font-weight: 700; color: var(--muted); display: block; margin-top: 16px; }
-
-  .card { background: var(--card); border-radius: var(--radius); padding: 18px; box-shadow: 0 10px 30px -18px rgba(60,30,90,.35); }
-
-  /* Start screen */
-  #start .scroll { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 40px;
-    background: linear-gradient(160deg, #ff8a5b 0%, #ff5e9c 45%, #7b5cff 100%); color: #fff; }
-  .logo { font-size: 40px; font-weight: 800; letter-spacing: -1px; }
-  .logo span { opacity: .85; }
-  .hero-emoji { font-size: 66px; margin-bottom: 6px; }
-  #start h1 { color: #fff; font-size: 38px; }
-  #start p.sub { color: rgba(255,255,255,.9); }
-  #start .btn.ghost { background: rgba(255,255,255,.16); color: #fff; border: 1.5px solid rgba(255,255,255,.35); backdrop-filter: blur(6px); }
-  .float { position: absolute; font-size: 30px; opacity: .9; animation: floaty 5s ease-in-out infinite; }
-  @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
-
-  /* Header bar */
-  .topbar { position: absolute; top: 44px; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 8px 18px; z-index: 20; }
-  .back { width: 38px; height: 38px; border-radius: 12px; background: #fff; display: grid; place-items: center; font-size: 18px; cursor: pointer; box-shadow: 0 6px 14px -8px rgba(0,0,0,.25); }
-
-  /* Avatars */
-  .avatars { display: flex; }
-  .avatars .av { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; margin-left: -10px; display: grid; place-items: center; font-size: 16px; }
-  .av { background: linear-gradient(135deg,#ffd3b6,#ff8a5b); }
-
-  /* Prompt card */
-  .prompt { background: linear-gradient(120deg, var(--purple), var(--sunset2)); color: #fff; }
-  .prompt .pill { background: rgba(255,255,255,.22); color: #fff; }
-
-  /* Feed grid */
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
-  .clip { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 3/4; display: flex; align-items: flex-end; padding: 10px; color: #fff; cursor: pointer; }
-  .clip .meta { position: relative; z-index: 2; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-  .clip::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.55), transparent 60%); z-index: 1; }
-  .clip .big { position: absolute; inset: 0; display: grid; place-items: center; font-size: 44px; }
-  .clip .react { position: absolute; top: 8px; right: 8px; z-index: 3; background: rgba(0,0,0,.35); border-radius: 999px; padding: 4px 8px; font-size: 12px; backdrop-filter: blur(4px); }
-  .clip .dur { position: absolute; top: 8px; left: 8px; z-index: 3; background: rgba(0,0,0,.4); border-radius: 8px; padding: 2px 7px; font-size: 11px; font-weight: 700; }
-
-  .g1{background:linear-gradient(135deg,#36d1dc,#5b86e5)} .g2{background:linear-gradient(135deg,#f7971e,#ffd200)}
-  .g3{background:linear-gradient(135deg,#fc466b,#3f5efb)} .g4{background:linear-gradient(135deg,#11998e,#38ef7d)}
-  .g5{background:linear-gradient(135deg,#ee0979,#ff6a00)} .g6{background:linear-gradient(135deg,#834d9b,#d04ed6)}
-
-  /* FAB */
-  .fab { position: absolute; bottom: 86px; left: 50%; transform: translateX(-50%); width: 66px; height: 66px; border-radius: 50%;
-    background: linear-gradient(120deg, var(--sunset1), var(--sunset2)); border: 4px solid #fff; display: grid; place-items: center;
-    box-shadow: 0 14px 28px -8px rgba(255,94,156,.7); cursor: pointer; z-index: 30; font-size: 26px; color: #fff; }
-  .fab:active { transform: translateX(-50%) scale(.93); }
-
-  /* Bottom nav */
-  .nav { position: absolute; bottom: 0; left: 0; right: 0; height: 76px; background: rgba(255,255,255,.92); backdrop-filter: blur(12px);
-    border-top: 1px solid #eee; display: flex; align-items: center; justify-content: space-around; padding-bottom: 14px; z-index: 25; }
-  .nav .item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--muted); cursor: pointer; font-weight: 600; }
-  .nav .item .ic { font-size: 20px; filter: grayscale(1); opacity: .55; }
-  .nav .item.on { color: var(--purple); }
-  .nav .item.on .ic { filter: none; opacity: 1; }
-
-  /* Capture screen */
-  #capture { background: #0d0a18; }
-  #capture .scroll { padding: 0; background: linear-gradient(160deg,#2b2150,#0d0a18); position: relative; }
-  .cam { position: absolute; inset: 0; display: grid; place-items: center; }
-  .cam-scene { font-size: 120px; filter: drop-shadow(0 20px 40px rgba(0,0,0,.4)); animation: floaty 6s ease-in-out infinite; }
-  .selfie { position: absolute; top: 70px; right: 16px; width: 96px; height: 130px; border-radius: 16px; background: linear-gradient(135deg,#ff8a5b,#ff5e9c); border: 2px solid rgba(255,255,255,.7); display: grid; place-items: center; font-size: 40px; box-shadow: 0 10px 24px -8px rgba(0,0,0,.5); }
-  .cam-prompt { position: absolute; top: 64px; left: 16px; right: 130px; color: #fff; }
-  .rec-btn { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 76px; height: 76px; border-radius: 50%; border: 5px solid #fff; background: var(--coral); cursor: pointer; box-shadow: 0 0 0 0 rgba(255,107,107,.6); }
-  .rec-btn.recording { animation: pulse 1s infinite; border-radius: 22px; }
-  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(255,107,107,.6)} 70%{box-shadow:0 0 0 22px rgba(255,107,107,0)} }
-  .cam-tools { position: absolute; bottom: 64px; width: 100%; display: flex; justify-content: space-around; align-items: center; color:#fff; }
-  .cam-tool { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.15); display: grid; place-items: center; font-size: 22px; cursor: pointer; }
-
-  /* Generate / processing */
-  #generate .scroll { background: linear-gradient(165deg,#1a1530,#3a2a6a 60%,#7b5cff); color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 8px; }
-  .reel-spin { font-size: 80px; animation: spin 3s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .steps { width: 100%; margin-top: 22px; display: flex; flex-direction: column; gap: 12px; }
-  .step { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,.1); padding: 12px 14px; border-radius: 14px; font-size: 14px; opacity: .45; transition: .4s; }
-  .step.done { opacity: 1; background: rgba(255,255,255,.18); }
-  .step .chk { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,.5); display: grid; place-items: center; font-size: 13px; }
-  .step.done .chk { background: #38ef7d; border-color: #38ef7d; color: #07351a; }
-  .bar { width: 100%; height: 8px; background: rgba(255,255,255,.2); border-radius: 999px; overflow: hidden; margin-top: 20px; }
-  .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#ffd200,#ff5e9c); transition: width .4s; }
-
-  /* Recap result */
-  #recap .scroll { padding-top: 56px; }
-  .player { position: relative; border-radius: 22px; overflow: hidden; aspect-ratio: 9/16; max-height: 380px; margin: 0 auto; display: grid; place-items: center; color: #fff; transition: .5s; }
-  .player .play { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.25); backdrop-filter: blur(6px); display: grid; place-items: center; font-size: 26px; border: 2px solid rgba(255,255,255,.6); }
-  .player .ov-title { position: absolute; bottom: 18px; left: 18px; right: 18px; z-index: 3; }
-  .player .ov-title h2 { font-size: 24px; }
-  .player::after { content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.5), transparent 55%); }
-  .player .badge { position: absolute; top: 14px; left: 14px; z-index: 3; }
-  .styles { display: flex; gap: 10px; overflow-x: auto; padding: 16px 2px; }
-  .styles::-webkit-scrollbar { height: 0; }
-  .style { flex: 0 0 auto; padding: 10px 16px; border-radius: 999px; background: #fff; border: 1.5px solid #ece7f5; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; }
-  .style.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .row { display: flex; gap: 10px; }
-  .toggle { display:flex; align-items:center; justify-content:space-between; }
-  .switch { width: 46px; height: 28px; border-radius: 999px; background:#e6e0f1; position: relative; cursor:pointer; transition:.2s; }
-  .switch.on { background: var(--purple); }
-  .switch i { position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:.2s; }
-  .switch.on i { left:21px; }
-
-  .muted { color: var(--muted); font-size: 13px; }
-  .mt { margin-top: 16px; } .mt-s { margin-top: 10px; } .mt-l { margin-top: 24px; }
-  .center { text-align: center; }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#ff5e9c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="assets/icon.svg" />
+<link rel="icon" href="assets/icon.svg" />
+<link rel="stylesheet" href="styles.css" />
+<title>Tripp — Urlaubsvideos mit Freunden</title>
 </head>
 <body>
-<div class="phone">
-  <div class="notch"></div>
-  <div class="screen-wrap">
+<div id="app">
 
-    <!-- ===== START ===== -->
-    <section class="screen active" id="start">
-      <div class="scroll">
-        <div class="float" style="top:80px;left:40px">✈️</div>
-        <div class="float" style="top:150px;right:46px;animation-delay:1s">🏝️</div>
-        <div class="float" style="top:250px;left:60px;animation-delay:2s">📸</div>
-        <div class="float" style="top:330px;right:70px;animation-delay:1.5s">🎬</div>
-        <div class="hero-emoji">🌴</div>
-        <div class="logo">Tripp<span>.</span></div>
-        <h1 class="mt">Euer Urlaub.<br/>Ein Video.<br/>Null Schnitt.</h1>
-        <p class="sub mt-s">Sammelt mit euren Freunden Clips während der Reise — die KI macht daraus automatisch ein Video.</p>
-        <button class="btn mt-l" onclick="go('create')">Trip erstellen 🚀</button>
-        <button class="btn ghost mt-s" onclick="go('home')">Trip beitreten</button>
+  <!-- ===== LANDING ===== -->
+  <section class="screen active" id="landing">
+    <div class="scroll">
+      <div class="float" style="top:60px;left:34px">✈️</div>
+      <div class="float" style="top:120px;right:40px;animation-delay:1s">🏝️</div>
+      <div class="float" style="top:220px;left:54px;animation-delay:2s">📸</div>
+      <div class="float" style="top:300px;right:60px;animation-delay:1.5s">🎬</div>
+      <div class="hero-emoji">🌴</div>
+      <div class="logo">Tripp.</div>
+      <h1 class="mt">Euer Urlaub.<br/>Ein Video.<br/>Null Schnitt.</h1>
+      <p class="sub mt-s">Sammelt mit euren Freunden Clips während der Reise — am Ende baut die App automatisch ein Video draus.</p>
+      <button class="btn mt-l" id="btnCreate">Trip erstellen 🚀</button>
+      <button class="btn ghost mt-s" id="btnJoin">Trip beitreten</button>
+    </div>
+  </section>
+
+  <!-- ===== CREATE ===== -->
+  <section class="screen" id="create">
+    <div class="topbar"><button class="back" data-go="landing">‹</button><b>Neuer Trip</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <h1>Wohin geht's?</h1>
+      <label class="lbl">Trip-Name</label>
+      <input class="field" id="cName" placeholder="z.B. Mädels-Trip Lissabon" />
+      <label class="lbl">Ziel (optional)</label>
+      <input class="field" id="cDest" placeholder="z.B. Lissabon, Portugal" />
+      <div class="row">
+        <div style="flex:1"><label class="lbl">Von</label><input class="field" id="cStart" type="date" /></div>
+        <div style="flex:1"><label class="lbl">Bis</label><input class="field" id="cEnd" type="date" /></div>
       </div>
-    </section>
+      <button class="btn mt-l" id="cSubmit">Trip anlegen</button>
+    </div>
+  </section>
 
-    <!-- ===== CREATE TRIP ===== -->
-    <section class="screen" id="create">
-      <div class="topbar"><div class="back" onclick="go('start')">‹</div><b>Neuer Trip</b><div style="width:38px"></div></div>
-      <div class="scroll">
-        <span class="pill">SCHRITT 1 VON 2</span>
-        <h1 class="mt">Wohin geht's?</h1>
-        <label class="lbl">Trip-Name</label>
-        <input class="field" id="tripName" value="Mädels-Trip Lissabon 🇵🇹" />
-        <label class="lbl">Ziel</label>
-        <input class="field" value="Lissabon, Portugal" />
-        <div class="row">
-          <div style="flex:1"><label class="lbl">Von</label><input class="field" value="14. Juni" /></div>
-          <div style="flex:1"><label class="lbl">Bis</label><input class="field" value="21. Juni" /></div>
+  <!-- ===== JOIN ===== -->
+  <section class="screen" id="join">
+    <div class="topbar"><button class="back" data-go="landing">‹</button><b>Beitreten</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <h1>Hast du einen Code?</h1>
+      <p class="sub mt-s">Gib den Trip-Code ein, den du von deinen Freunden bekommen hast.</p>
+      <input class="field" id="jCode" placeholder="z.B. LISBOA" autocapitalize="characters" style="text-transform:uppercase;font-size:22px;letter-spacing:3px;text-align:center" />
+      <button class="btn mt-l" id="jSubmit">Trip suchen</button>
+    </div>
+  </section>
+
+  <!-- ===== PROFILE (name + emoji) ===== -->
+  <section class="screen" id="profile">
+    <div class="topbar"><button class="back" data-go="landing">‹</button><b id="pTripName">Trip</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <h1>Wer bist du?</h1>
+      <p class="sub mt-s">So tauchst du im Feed auf.</p>
+      <label class="lbl">Dein Name</label>
+      <input class="field" id="pName" placeholder="z.B. Mia" />
+      <label class="lbl">Wähle dein Avatar</label>
+      <div class="emoji-grid" id="emojiGrid"></div>
+      <button class="btn mt-l" id="pSubmit">Los geht's! 🎉</button>
+    </div>
+  </section>
+
+  <!-- ===== FEED ===== -->
+  <section class="screen" id="feed">
+    <div class="scroll">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div class="muted" style="font-weight:700" id="feedDay">DEINE REISE</div>
+          <h1 id="feedTitle" style="font-size:26px">Trip</h1>
         </div>
-        <label class="lbl">Cover</label>
-        <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">
-          <div class="clip g5" style="aspect-ratio:1"><div class="big">🌅</div></div>
-          <div class="clip g1" style="aspect-ratio:1"><div class="big">🏖️</div></div>
-          <div class="clip g4" style="aspect-ratio:1"><div class="big">🍹</div></div>
-          <div class="clip g6" style="aspect-ratio:1"><div class="big">🎉</div></div>
-        </div>
-        <button class="btn mt-l" onclick="go('invite')">Weiter</button>
+        <div class="avatars" id="feedAvatars"></div>
       </div>
-    </section>
 
-    <!-- ===== INVITE ===== -->
-    <section class="screen" id="invite">
-      <div class="topbar"><div class="back" onclick="go('create')">‹</div><b>Crew einladen</b><div style="width:38px"></div></div>
-      <div class="scroll">
-        <span class="pill">SCHRITT 2 VON 2</span>
-        <h1 class="mt">Hol deine Leute<br/>ins Boot 🛥️</h1>
-        <p class="sub mt-s">Teile den Link — kein Account nötig, einfach beitreten und mitfilmen.</p>
-
-        <div class="card mt-l center">
-          <div style="width:170px;height:170px;margin:0 auto;border-radius:18px;background:
-            repeating-conic-gradient(#1a1530 0 25%, #fff 0 50%) 0/26px 26px;display:grid;place-items:center">
-            <div style="background:#fff;padding:8px;border-radius:10px;font-size:30px">🌴</div>
-          </div>
-          <div class="card mt" style="background:#f4f1fa;display:flex;align-items:center;justify-content:space-between;padding:12px 14px">
-            <span class="muted">tripp.app/j/LISBOA24</span>
-            <button class="style on" style="padding:6px 12px" onclick="this.textContent='Kopiert ✓'">Kopieren</button>
-          </div>
-        </div>
-
-        <h2 class="mt-l">Schon dabei (4)</h2>
-        <div class="card mt-s">
-          <div style="display:flex;align-items:center;gap:12px"><div class="av" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px">👑</div><div><b>Du</b><div class="muted">Admin</div></div></div>
-          <div style="display:flex;align-items:center;gap:12px;margin-top:14px"><div class="av g3" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px">🦊</div><div><b>Mia</b><div class="muted">gerade beigetreten</div></div></div>
-          <div style="display:flex;align-items:center;gap:12px;margin-top:14px"><div class="av g4" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px">🐨</div><div><b>Jonas</b><div class="muted">gerade beigetreten</div></div></div>
-          <div style="display:flex;align-items:center;gap:12px;margin-top:14px"><div class="av g1" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px">🐧</div><div><b>Sara</b><div class="muted">gerade beigetreten</div></div></div>
-        </div>
-        <button class="btn mt-l" onclick="go('home')">Los geht's! 🎉</button>
+      <div class="card prompt mt">
+        <span class="pill">⏰ TAGES-CHALLENGE</span>
+        <h2 class="mt-s" id="challengeText">Fang den Sonnenuntergang ein 🌅</h2>
+        <p class="mt-s" style="opacity:.9;font-size:14px" id="challengeSub">Tippe ＋ und film deinen Moment.</p>
       </div>
-    </section>
 
-    <!-- ===== HOME / FEED ===== -->
-    <section class="screen" id="home">
-      <div class="scroll" id="homeScroll">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div>
-            <div class="muted" style="font-weight:700">TAG 3 · LISSABON</div>
-            <h1 style="font-size:26px">Mädels-Trip 🇵🇹</h1>
-          </div>
-          <div class="avatars">
-            <div class="av g3">🦊</div><div class="av g4">🐨</div><div class="av g1">🐧</div><div class="av" style="background:#1a1530;color:#fff;font-size:12px">+1</div>
-          </div>
-        </div>
-
-        <div class="card prompt mt">
-          <span class="pill">⏰ TAGES-CHALLENGE</span>
-          <h2 class="mt-s">Fang den Sonnenuntergang ein 🌅</h2>
-          <p class="mt-s" style="opacity:.9;font-size:14px">Noch 4 Std. · 2 von 4 haben's schon gefilmt</p>
-        </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between" class="mt-l">
-          <h2>Die Reise bisher</h2>
-          <span class="muted">23 Clips</span>
-        </div>
-
-        <div class="grid" id="clipGrid">
-          <div class="clip g2"><div class="big">🍽️</div><span class="dur">0:14</span><span class="react">❤️ 4</span><div class="meta">🦊 Mia · Mittag</div></div>
-          <div class="clip g1"><div class="big">🏖️</div><span class="dur">0:22</span><span class="react">😂 6</span><div class="meta">🐨 Jonas · Strand</div></div>
-          <div class="clip g6"><div class="big">🎉</div><span class="dur">0:31</span><span class="react">🔥 9</span><div class="meta">👑 Du · Bar</div></div>
-          <div class="clip g4"><div class="big">🚋</div><span class="dur">0:09</span><span class="react">❤️ 3</span><div class="meta">🐧 Sara · Tram 28</div></div>
-          <div class="clip g5"><div class="big">🌅</div><span class="dur">0:18</span><span class="react">😍 7</span><div class="meta">🦊 Mia · Aussicht</div></div>
-          <div class="clip g3"><div class="big">🏄</div><span class="dur">0:27</span><span class="react">🔥 5</span><div class="meta">🐨 Jonas · Surf</div></div>
-        </div>
-
-        <div class="card mt-l" style="background:linear-gradient(120deg,#11998e,#38ef7d);color:#fff">
-          <h2>Reise endet in 4 Tagen</h2>
-          <p class="mt-s" style="opacity:.95;font-size:14px">Danach baut die KI euer gemeinsames Video. Du kannst auch jetzt schon eine Vorschau erstellen.</p>
-          <button class="btn ghost mt" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4)" onclick="startGenerate()">✨ KI-Video erstellen</button>
-        </div>
+      <div style="display:flex;align-items:center;justify-content:space-between" class="mt-l">
+        <h2>Die Reise bisher</h2>
+        <button class="btn ghost sm" id="btnRefresh">↻</button>
       </div>
-      <div class="fab" onclick="go('capture')">＋</div>
-      <div class="nav">
-        <div class="item on"><div class="ic">🏠</div>Feed</div>
-        <div class="item" onclick="alert('Karten-Ansicht: alle Clips nach Ort 📍 (Prototyp)')"><div class="ic">🗺️</div>Karte</div>
-        <div style="width:66px"></div>
-        <div class="item" onclick="startGenerate()"><div class="ic">🎬</div>Recap</div>
-        <div class="item" onclick="alert('Profil & deine Trips (Prototyp)')"><div class="ic">👤</div>Du</div>
+
+      <div class="grid" id="clipGrid"></div>
+      <div class="empty hidden" id="feedEmpty">Noch keine Clips — sei die*der Erste! Tippe ＋</div>
+
+      <button class="btn mt-l" id="btnRecap">✨ Recap-Video erstellen</button>
+      <button class="btn ghost mt-s sm" id="btnShare" style="width:100%">🔗 Freunde einladen (Code <b id="shareCode"></b>)</button>
+    </div>
+    <button class="fab" id="fab">＋</button>
+    <div class="nav">
+      <button class="item on"><span class="ic">🏠</span>Feed</button>
+      <button class="item" id="navRecap"><span class="ic">🎬</span>Recap</button>
+      <span style="width:64px"></span>
+      <button class="item" id="navShare"><span class="ic">🔗</span>Einladen</button>
+      <button class="item" id="navLeave"><span class="ic">🚪</span>Wechseln</button>
+    </div>
+  </section>
+
+  <!-- ===== CAPTURE ===== -->
+  <section class="screen" id="capture">
+    <div class="topbar"><button class="back" data-go="feed">‹</button><b>Clip hinzufügen</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <input type="file" id="fileCam" accept="video/*" capture="environment" class="hidden" />
+      <input type="file" id="fileGal" accept="video/*" class="hidden" />
+
+      <div id="captureChoice">
+        <div class="card prompt"><span class="pill">🌅 Heutige Challenge</span><h2 class="mt-s" id="capChallenge">Sonnenuntergang</h2></div>
+        <button class="btn mt-l" id="btnRecord">🎥 Jetzt aufnehmen</button>
+        <button class="btn ghost mt-s" id="btnGallery">🖼️ Aus Galerie wählen</button>
+        <p class="muted center mt-l">Tipp: kurze Clips (5–20 Sek.) machen das beste Recap.</p>
       </div>
-    </section>
 
-    <!-- ===== CAPTURE ===== -->
-    <section class="screen" id="capture">
-      <div class="scroll">
-        <div class="cam">
-          <div class="cam-scene" id="camScene">🌅</div>
-        </div>
-        <div class="cam-prompt">
-          <span class="pill" style="background:rgba(255,255,255,.2);color:#fff">🌅 Challenge</span>
-          <h2 style="color:#fff;margin-top:8px">Sonnenuntergang</h2>
-        </div>
-        <div class="selfie">🤳</div>
-        <div class="back" style="position:absolute;top:64px;left:16px" onclick="go('home')">‹</div>
-        <div class="rec-btn" id="recBtn" onclick="toggleRec()"></div>
-        <div class="cam-tools">
-          <div class="cam-tool" onclick="flipScene()">🔄</div>
-          <div style="width:76px"></div>
-          <div class="cam-tool" onclick="alert('Musik & Filter (Prototyp) 🎵')">🎵</div>
-        </div>
+      <div id="captureUpload" class="hidden">
+        <div class="preview-box"><video id="capPreview" playsinline muted controls></video></div>
+        <label class="lbl">Kurze Beschreibung (optional)</label>
+        <input class="field" id="capCaption" placeholder="z.B. Sonnenuntergang am Strand" />
+        <div class="uploadbar hidden" id="capBar"><i></i></div>
+        <button class="btn mt-l" id="btnUpload">Hochladen & teilen</button>
+        <button class="btn ghost mt-s" id="btnRetake">Anderen Clip wählen</button>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ===== GENERATE ===== -->
-    <section class="screen" id="generate">
-      <div class="scroll">
-        <div class="reel-spin">🎞️</div>
-        <h1 style="color:#fff">KI schneidet<br/>euer Video…</h1>
-        <p class="sub" style="color:rgba(255,255,255,.85)">23 Clips · 4 Reisende · 3 Tage</p>
-        <div class="bar"><i id="progBar"></i></div>
-        <div class="steps" id="steps">
-          <div class="step" data-i="0"><div class="chk">1</div>Beste Momente erkennen</div>
-          <div class="step" data-i="1"><div class="chk">2</div>Verwackeltes & Doppeltes aussortieren</div>
-          <div class="step" data-i="2"><div class="chk">3</div>Musik auf den Beat schneiden</div>
-          <div class="step" data-i="3"><div class="chk">4</div>Titel, Untertitel & Orte einfügen</div>
-        </div>
+  <!-- ===== RECAP ===== -->
+  <section class="screen" id="recap">
+    <div class="topbar"><button class="back" data-go="feed">‹</button><b>Recap-Video</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <div class="card center">
+        <div style="font-size:54px">🎞️</div>
+        <h2 class="mt-s" id="recapTitle">Euer Reise-Video</h2>
+        <p class="sub mt-s" id="recapInfo">Alle Clips werden zu einem Video zusammengefügt.</p>
       </div>
-    </section>
 
-    <!-- ===== RECAP RESULT ===== -->
-    <section class="screen" id="recap">
-      <div class="topbar"><div class="back" onclick="go('home')">‹</div><b>Euer Reise-Video</b><div style="width:38px"></div></div>
-      <div class="scroll">
-        <div class="player g5" id="player">
-          <span class="badge pill" style="background:rgba(0,0,0,.4);color:#fff" id="styleBadge">🎬 Cinematic</span>
-          <div class="play">▶</div>
-          <div class="ov-title"><div class="muted" style="color:rgba(255,255,255,.85);font-weight:700">1:24 · 4K · vertikal</div><h2 id="recapTitle">Lissabon '24 — Die Reise</h2></div>
-        </div>
-
-        <div class="styles">
-          <div class="style on" onclick="setStyle(this,'cinematic')">🎬 Cinematic</div>
-          <div class="style" onclick="setStyle(this,'fun')">🎉 Fun-Montage</div>
-          <div class="style" onclick="setStyle(this,'vlog')">📹 Vlog</div>
-          <div class="style" onclick="setStyle(this,'chill')">🌊 Chill</div>
-        </div>
-
-        <div class="card toggle">
-          <div><b>Mein persönlicher Cut</b><div class="muted">Mehr Clips mit dir drin</div></div>
-          <div class="switch" id="persSwitch" onclick="this.classList.toggle('on')"><i></i></div>
-        </div>
-
-        <div class="card mt toggle">
-          <div><b>KI-Voiceover</b><div class="muted">Erzählerstimme über die Highlights</div></div>
-          <div class="switch" id="voSwitch" onclick="this.classList.toggle('on')"><i></i></div>
-        </div>
-
-        <button class="btn mt-l">⬇️ In Galerie speichern</button>
-        <div class="row mt-s">
-          <button class="btn ghost" style="flex:1" onclick="alert('Export als TikTok/Reel (Prototyp)')">↗ TikTok</button>
-          <button class="btn ghost" style="flex:1" onclick="alert('In der Gruppe teilen (Prototyp)')">👥 Gruppe</button>
-        </div>
-        <p class="muted center mt-l">Tripp · Prototyp — Konzeptdemo</p>
+      <div class="card mt toggle">
+        <div><b>Musik</b><div class="muted">Hintergrundmusik (falls hinterlegt)</div></div>
+        <div class="switch on" id="swMusic"><i></i></div>
       </div>
-    </section>
+      <div class="card mt toggle">
+        <div><b>Titelkarte</b><div class="muted">Intro mit Trip-Name zeigen</div></div>
+        <div class="switch on" id="swTitle"><i></i></div>
+      </div>
 
+      <button class="btn mt-l" id="btnPlayRecap">▶ Recap abspielen</button>
+      <p class="muted center mt">Spielt alle Clips automatisch hintereinander ab — wie ein fertiges Video.</p>
+    </div>
+  </section>
+
+  <!-- ===== RECAP PLAYER (overlay) ===== -->
+  <div class="player-wrap" id="playerWrap">
+    <div class="progress" id="playerProgress"></div>
+    <div class="player-top">
+      <button class="player-x" id="playerClose">✕</button>
+      <button class="player-x" id="playerPause" style="width:auto;padding:0 14px;border-radius:20px">⏸</button>
+    </div>
+    <video id="recapVideo" playsinline></video>
+    <div class="player-overlay">
+      <div class="label" id="recapLabel"></div>
+    </div>
+    <div class="titlecard" id="recapTitleCard">
+      <div style="font-size:60px">🌴</div>
+      <h1 id="tcName" style="color:#fff;font-size:34px;margin-top:8px"></h1>
+      <p id="tcSub" style="opacity:.92;margin-top:6px"></p>
+    </div>
   </div>
+
 </div>
 
-<script>
-  function go(id){
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.querySelector('#'+id+' .scroll').scrollTop = 0;
-  }
+<div class="toast" id="toast"></div>
 
-  // Capture: record toggle -> add clip to feed
-  let recording = false;
-  function toggleRec(){
-    const b = document.getElementById('recBtn');
-    recording = !recording;
-    b.classList.toggle('recording', recording);
-    if(!recording){
-      addClip();
-      setTimeout(()=>{ go('home'); alert('Clip gespeichert & mit der Gruppe geteilt! 🎬'); }, 250);
-    }
-  }
-  const scenes = ['🌅','🏖️','🍹','🎉','🚋','🏄','🐠','🌃'];
-  let sIdx = 0;
-  function flipScene(){ sIdx=(sIdx+1)%scenes.length; document.getElementById('camScene').textContent = scenes[sIdx]; }
-  function addClip(){
-    const grid = document.getElementById('clipGrid');
-    const gradients=['g1','g2','g3','g4','g5','g6'];
-    const el = document.createElement('div');
-    el.className = 'clip '+gradients[Math.floor(Math.random()*6)];
-    const dur = '0:'+String(8+Math.floor(Math.random()*20)).padStart(2,'0');
-    el.innerHTML = '<div class="big">'+scenes[sIdx]+'</div><span class="dur">'+dur+'</span><span class="react">✨ neu</span><div class="meta">👑 Du · gerade</div>';
-    grid.insertBefore(el, grid.firstChild);
-  }
-
-  // Generate: animate steps + progress
-  function startGenerate(){
-    go('generate');
-    const steps = [...document.querySelectorAll('#steps .step')];
-    const bar = document.getElementById('progBar');
-    steps.forEach(s=>s.classList.remove('done'));
-    bar.style.width = '0';
-    let i = 0;
-    const tick = ()=>{
-      if(i < steps.length){
-        steps[i].classList.add('done');
-        bar.style.width = ((i+1)/steps.length*100)+'%';
-        i++;
-        setTimeout(tick, 850);
-      } else {
-        setTimeout(()=>go('recap'), 700);
-      }
-    };
-    setTimeout(tick, 500);
-  }
-
-  // Recap: style switcher
-  const styleMap = {
-    cinematic: { cls:'g5', badge:'🎬 Cinematic', title:"Lissabon '24 — Die Reise" },
-    fun:       { cls:'g2', badge:'🎉 Fun-Montage', title:'Best of Lissabon 😂🔥' },
-    vlog:      { cls:'g4', badge:'📹 Vlog', title:'Unser Lissabon-Vlog' },
-    chill:     { cls:'g1', badge:'🌊 Chill', title:'Lisboa, slow days 🌊' },
-  };
-  function setStyle(el, key){
-    document.querySelectorAll('.style').forEach(s=>s.classList.remove('on'));
-    el.classList.add('on');
-    const m = styleMap[key];
-    const p = document.getElementById('player');
-    p.className = 'player '+m.cls;
-    document.getElementById('styleBadge').innerHTML = m.badge;
-    document.getElementById('recapTitle').textContent = m.title;
-  }
-</script>
+<script src="config.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>

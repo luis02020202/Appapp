@@ -1,0 +1,13 @@
+{
+  "name": "Tripp — Urlaubsvideos mit Freunden",
+  "short_name": "Tripp",
+  "description": "Sammelt gemeinsam Urlaubs-Clips und macht daraus automatisch ein Video.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1530",
+  "theme_color": "#ff5e9c",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
