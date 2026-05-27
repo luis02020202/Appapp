@@ -9,6 +9,9 @@
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="assets/icon.svg" />
 <link rel="icon" href="assets/icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
 <title>Tripp — Urlaubsvideos mit Freunden</title>
 </head>
@@ -18,16 +21,19 @@
   <!-- ===== LANDING ===== -->
   <section class="screen active" id="landing">
     <div class="scroll">
-      <div class="float" style="top:60px;left:34px">✈️</div>
-      <div class="float" style="top:120px;right:40px;animation-delay:1s">🏝️</div>
-      <div class="float" style="top:220px;left:54px;animation-delay:2s">📸</div>
-      <div class="float" style="top:300px;right:60px;animation-delay:1.5s">🎬</div>
-      <div class="hero-emoji">🌴</div>
-      <div class="logo">Tripp.</div>
-      <h1 class="mt">Euer Urlaub.<br/>Ein Video.<br/>Null Schnitt.</h1>
-      <p class="sub mt-s">Sammelt mit euren Freunden Clips während der Reise — am Ende baut die App automatisch ein Video draus.</p>
-      <button class="btn mt-l" id="btnCreate">Trip erstellen 🚀</button>
-      <button class="btn ghost mt-s" id="btnJoin">Trip beitreten</button>
+      <div class="float" style="top:64px;left:30px">✈️</div>
+      <div class="float" style="top:128px;right:36px;animation-delay:1.2s">🏝️</div>
+      <div class="float" style="top:250px;left:48px;animation-delay:2.1s">🎬</div>
+      <div class="brandmark"><span class="dot">🌴</span><span class="logo">Tripp</span></div>
+      <h1 class="mt-l">Euer Urlaub.<br/>Ein Video.<br/>Null Schnitt.</h1>
+      <p class="sub mt-s">Sammelt mit Freunden Clips während der Reise — am Ende baut die App automatisch ein Video daraus.</p>
+      <div class="steps3">
+        <div class="s"><div class="e">👯</div><div class="t">Crew<br/>einladen</div></div>
+        <div class="s"><div class="e">🎥</div><div class="t">Momente<br/>filmen</div></div>
+        <div class="s"><div class="e">✨</div><div class="t">Video<br/>erhalten</div></div>
+      </div>
+      <button class="btn mt-l" id="btnCreate">Trip erstellen</button>
+      <button class="btn ghost mt-s" id="btnJoin">Ich habe einen Code</button>
     </div>
   </section>
 
@@ -76,27 +82,27 @@
   <!-- ===== FEED ===== -->
   <section class="screen" id="feed">
     <div class="scroll">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+      <div class="feedhead">
         <div>
-          <div class="muted" style="font-weight:700" id="feedDay">DEINE REISE</div>
-          <h1 id="feedTitle" style="font-size:26px">Trip</h1>
+          <span class="daychip" id="feedDay">DEINE REISE</span>
+          <h1 id="feedTitle" class="mt-s" style="font-size:25px">Trip</h1>
         </div>
         <div class="avatars" id="feedAvatars"></div>
       </div>
 
       <div class="card prompt mt">
-        <span class="pill">⏰ TAGES-CHALLENGE</span>
+        <span class="pill">⏰ HEUTE</span>
         <h2 class="mt-s" id="challengeText">Fang den Sonnenuntergang ein 🌅</h2>
-        <p class="mt-s" style="opacity:.9;font-size:14px" id="challengeSub">Tippe ＋ und film deinen Moment.</p>
+        <p class="mt-s" style="opacity:.92;font-size:14px" id="challengeSub">Tippe ＋ und film deinen Moment.</p>
       </div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between" class="mt-l">
+      <div class="sec mt-l">
         <h2>Die Reise bisher</h2>
-        <button class="btn ghost sm" id="btnRefresh">↻</button>
+        <button class="btn ghost sm" id="btnRefresh">↻ Aktualisieren</button>
       </div>
 
       <div class="grid" id="clipGrid"></div>
-      <div class="empty hidden" id="feedEmpty">Noch keine Clips — sei die*der Erste! Tippe ＋</div>
+      <div class="empty hidden" id="feedEmpty"><span class="e">🎬</span>Noch keine Clips.<br/>Sei die*der Erste — tippe auf ＋</div>
 
       <button class="btn mt-l" id="btnRecap">✨ Recap-Video erstellen</button>
       <button class="btn ghost mt-s sm" id="btnShare" style="width:100%">🔗 Freunde einladen (Code <b id="shareCode"></b>)</button>
@@ -119,9 +125,11 @@
       <input type="file" id="fileGal" accept="video/*" class="hidden" />
 
       <div id="captureChoice">
-        <div class="card prompt"><span class="pill">🌅 Heutige Challenge</span><h2 class="mt-s" id="capChallenge">Sonnenuntergang</h2></div>
-        <button class="btn mt-l" id="btnRecord">🎥 Jetzt aufnehmen</button>
-        <button class="btn ghost mt-s" id="btnGallery">🖼️ Aus Galerie wählen</button>
+        <div class="card prompt"><span class="pill">🌅 HEUTE</span><h2 class="mt-s" id="capChallenge">Sonnenuntergang</h2></div>
+        <div class="choice-tiles">
+          <div class="tile" id="btnRecord"><div class="e">🎥</div><div class="t">Aufnehmen</div><div class="d">mit der Kamera</div></div>
+          <div class="tile" id="btnGallery"><div class="e">🖼️</div><div class="t">Galerie</div><div class="d">Clip auswählen</div></div>
+        </div>
         <p class="muted center mt-l">Tipp: kurze Clips (5–20 Sek.) machen das beste Recap.</p>
       </div>
 
@@ -140,10 +148,10 @@
   <section class="screen" id="recap">
     <div class="topbar"><button class="back" data-go="feed">‹</button><b>Recap-Video</b><span style="width:38px"></span></div>
     <div class="scroll">
-      <div class="card center">
-        <div style="font-size:54px">🎞️</div>
-        <h2 class="mt-s" id="recapTitle">Euer Reise-Video</h2>
-        <p class="sub mt-s" id="recapInfo">Alle Clips werden zu einem Video zusammengefügt.</p>
+      <div class="recap-cover">
+        <div class="big">🎞️</div>
+        <h2 id="recapTitle">Euer Reise-Video</h2>
+        <p class="mt-s" id="recapInfo" style="opacity:.95;font-size:14px">Alle Clips werden zu einem Video zusammengefügt.</p>
       </div>
 
       <div class="card mt toggle">
