@@ -424,7 +424,7 @@ async function uploadClip() {
    ============================================================ */
 async function shareTrip() {
   const t = state.trip; const link = shareLink(t.code);
-  const text = `Komm in unseren Tripp "${t.name}"! Code: ${t.code}\n${link}`;
+  const text = `🎬 Wir drehen ein Reise-Video von "${t.name}" auf Tripp – sei dabei!\nCode: ${t.code}\n${link}`;
   if (navigator.share) { try { await navigator.share({ title: "Tripp", text, url: link }); return; } catch {} }
   try { await navigator.clipboard.writeText(link); toast("Einladungs-Link kopiert 📋"); }
   catch { toast("Code: " + t.code); }
@@ -453,6 +453,7 @@ function playRecap() {
   if (!recapList.length) return toast("Keine Clips");
   recapIdx = 0;
   $("#playerWrap").classList.add("on");
+  $("#recapEndCard").classList.add("hide");
 
   const prog = $("#playerProgress"); prog.innerHTML = "";
   recapList.forEach(() => { const seg = document.createElement("div"); seg.className = "seg"; seg.innerHTML = "<i></i>"; prog.appendChild(seg); });
@@ -497,12 +498,16 @@ function startClip(i) {
 
 function endRecap() {
   $$("#playerProgress .seg").forEach((seg) => { seg.classList.add("done"); seg.querySelector("i").style.width = "100%"; });
-  toast("Das war euer Recap! 🎉");
-  setTimeout(closeRecap, 900);
+  const v = $("#recapVideo"); v.pause();
+  if (recapAudio) { recapAudio.pause(); recapAudio = null; }
+  const days = dayLabel(state.trip);
+  $("#endStats").textContent = `${state.clips.length} Clips · ${state.members.length} Reisende${days ? " · " + days : ""}`;
+  $("#recapEndCard").classList.remove("hide");
 }
 function closeRecap() {
   const v = $("#recapVideo"); v.pause(); v.removeAttribute("src"); v.load();
   if (recapAudio) { recapAudio.pause(); recapAudio = null; }
+  $("#recapEndCard").classList.add("hide");
   $("#playerWrap").classList.remove("on");
 }
 function togglePause() {
@@ -560,6 +565,9 @@ function wireEvents() {
   $("#btnPlayRecap").onclick = playRecap;
   $("#playerClose").onclick = closeRecap;
   $("#playerPause").onclick = togglePause;
+  $("#btnShareRecap").onclick = shareTrip;
+  $("#btnReplayRecap").onclick = playRecap;
+  $("#btnCloseEnd").onclick = closeRecap;
   $("#recapVideo").addEventListener("ended", () => startClip(recapIdx + 1));
 
   $("#swMusic").onclick = () => $("#swMusic").classList.toggle("on");

@@ -393,6 +393,16 @@ label.lbl { font-size: 12.5px; font-weight: 700; color: var(--muted); display: b
       <h1 id="tcName" style="color:#fff;font-size:34px;margin-top:8px"></h1>
       <p id="tcSub" style="opacity:.92;margin-top:6px"></p>
     </div>
+    <div class="titlecard hide" id="recapEndCard">
+      <div style="font-size:56px">🎉</div>
+      <h1 style="color:#fff;font-size:29px;margin-top:6px">Euer Recap steht!</h1>
+      <p id="endStats" style="opacity:.94;margin-top:6px"></p>
+      <div style="width:100%;max-width:330px;margin-top:26px">
+        <button class="btn" id="btnShareRecap" style="background:#fff;color:#211d33;box-shadow:0 12px 28px -12px rgba(0,0,0,.5)">📲 Teilen & Freunde einladen</button>
+        <button class="btn ghost mt-s" id="btnReplayRecap" style="background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.34)">↻ Nochmal ansehen</button>
+        <button id="btnCloseEnd" style="background:none;border:none;color:rgba(255,255,255,.85);font-weight:700;font-family:inherit;font-size:15px;margin-top:16px;cursor:pointer">Schließen</button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -827,7 +837,7 @@ async function uploadClip() {
    ============================================================ */
 async function shareTrip() {
   const t = state.trip; const link = shareLink(t.code);
-  const text = `Komm in unseren Tripp "${t.name}"! Code: ${t.code}\n${link}`;
+  const text = `🎬 Wir drehen ein Reise-Video von "${t.name}" auf Tripp – sei dabei!\nCode: ${t.code}\n${link}`;
   if (navigator.share) { try { await navigator.share({ title: "Tripp", text, url: link }); return; } catch {} }
   try { await navigator.clipboard.writeText(link); toast("Einladungs-Link kopiert 📋"); }
   catch { toast("Code: " + t.code); }
@@ -856,6 +866,7 @@ function playRecap() {
   if (!recapList.length) return toast("Keine Clips");
   recapIdx = 0;
   $("#playerWrap").classList.add("on");
+  $("#recapEndCard").classList.add("hide");
 
   const prog = $("#playerProgress"); prog.innerHTML = "";
   recapList.forEach(() => { const seg = document.createElement("div"); seg.className = "seg"; seg.innerHTML = "<i></i>"; prog.appendChild(seg); });
@@ -900,12 +911,16 @@ function startClip(i) {
 
 function endRecap() {
   $("#playerProgress .seg").forEach((seg) => { seg.classList.add("done"); seg.querySelector("i").style.width = "100%"; });
-  toast("Das war euer Recap! 🎉");
-  setTimeout(closeRecap, 900);
+  const v = $("#recapVideo"); v.pause();
+  if (recapAudio) { recapAudio.pause(); recapAudio = null; }
+  const days = dayLabel(state.trip);
+  $("#endStats").textContent = `${state.clips.length} Clips · ${state.members.length} Reisende${days ? " · " + days : ""}`;
+  $("#recapEndCard").classList.remove("hide");
 }
 function closeRecap() {
   const v = $("#recapVideo"); v.pause(); v.removeAttribute("src"); v.load();
   if (recapAudio) { recapAudio.pause(); recapAudio = null; }
+  $("#recapEndCard").classList.add("hide");
   $("#playerWrap").classList.remove("on");
 }
 function togglePause() {
@@ -963,6 +978,9 @@ function wireEvents() {
   $("#btnPlayRecap").onclick = playRecap;
   $("#playerClose").onclick = closeRecap;
   $("#playerPause").onclick = togglePause;
+  $("#btnShareRecap").onclick = shareTrip;
+  $("#btnReplayRecap").onclick = playRecap;
+  $("#btnCloseEnd").onclick = closeRecap;
   $("#recapVideo").addEventListener("ended", () => startClip(recapIdx + 1));
 
   $("#swMusic").onclick = () => $("#swMusic").classList.toggle("on");
