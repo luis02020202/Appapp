@@ -1,11 +1,10 @@
 // Minimaler Service Worker: App-Shell cachen, Netzwerk bevorzugen.
-const CACHE = "tripp-v2";
+const CACHE = "mosaik-v1";
 const SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
-  "./config.js",
   "./manifest.json",
   "./assets/icon.svg",
 ];
@@ -25,9 +24,7 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  const url = new URL(e.request.url);
-  // Supabase-Anfragen (API + Storage) immer direkt aus dem Netz.
-  if (url.hostname.endsWith("supabase.co") || e.request.method !== "GET") return;
+  if (e.request.method !== "GET") return;
   e.respondWith(
     fetch(e.request)
       .then((res) => {

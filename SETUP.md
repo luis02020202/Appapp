@@ -1,43 +1,45 @@
-# Tripp — Setup
+# Mosaik — Setup
 
-Eine Web-App (PWA): Freunde sammeln gemeinsam Urlaubs-Clips, am Ende werden sie
-automatisch zu einem Recap-Video aneinandergereiht.
+Eine Web-App (PWA): Du stellst dir dein eigenes Tagebuch aus Bausteinen
+zusammen — **Gesicht**, **Körper**, **Mentale Gesundheit** — und hältst
+jeden Tag fest, was dir wichtig ist. Du kannst beliebig viele Tagebücher
+mit unterschiedlichen Baustein-Kombinationen anlegen (z.B. eins nur für
+Gesicht, eins für Körper + Gesicht, eins nur für mentale Gesundheit).
 
-## Sofort ausprobieren (Demo-Modus, kein Setup)
+## 🔒 Privatsphäre zuerst
 
-Solange `config.js` nicht ausgefüllt ist, läuft die App im **Demo-Modus**:
-alles funktioniert lokal auf deinem Gerät (Trip anlegen, Videos aufnehmen, Feed,
-Recap abspielen). Clips werden dabei **nur auf diesem Gerät** gespeichert, noch
-nicht mit Freunden geteilt.
+Es gibt **kein Konto, keinen Server, keine Cloud**. Alle Fotos, Texte und
+Sprachnachrichten werden ausschließlich lokal auf deinem iPhone gespeichert
+(IndexedDB/localStorage im Browser). Nichts verlässt dein Gerät. Das
+bedeutet auch: Löschst du die App/den Browser-Speicher, sind die Daten weg —
+ein manuelles Backup (z.B. Screenshots wichtiger Fotos) liegt in deiner
+eigenen Verantwortung.
 
-So bekommst du die App aufs Handy:
+## So bekommst du die App aufs iPhone
 
 1. **GitHub Pages aktivieren** (einmalig, geht auch am Handy):
    - Repo → **Settings** → links **Pages**
    - *Source*: **Deploy from a branch**
-   - Branch: `claude/vacation-video-app-concept-Uha27`, Ordner `/ (root)` → **Save**
+   - Branch: `claude/modular-diary-app-ios-5s30rw`, Ordner `/ (root)` → **Save**
    - Nach ~1 Min erscheint oben die URL, z.B. `https://<user>.github.io/appapp/`
-2. URL auf dem Handy öffnen → „Zum Home-Bildschirm hinzufügen" für App-Feeling.
+2. Die URL in **Safari** auf dem iPhone öffnen.
+3. Teilen-Symbol (□↑) antippen → **„Zum Home-Bildschirm"** → hinzufügen.
+4. Ab jetzt startet Mosaik wie eine echte App vom Home-Bildschirm — inkl.
+   Kamera- und Mikrofonzugriff für Fotos und Sprachnachrichten.
 
-## Echtes Teilen aktivieren (Supabase, ~10 Min am Rechner)
+## Wie die App funktioniert
 
-1. Konto auf https://supabase.com anlegen → **New project** (Region EU wählen).
-2. **SQL Editor** → New query → Inhalt von `supabase-setup.sql` einfügen → **Run**.
-   (Legt Tabellen, Policies und den `clips`-Storage-Bucket an.)
-3. **Project Settings → API** öffnen und zwei Werte kopieren:
-   - *Project URL* → `SUPABASE_URL`
-   - *Project API keys → anon public* → `SUPABASE_ANON_KEY`
-4. Diese zwei Werte in `config.js` eintragen, committen, pushen.
-5. Fertig: Freunde öffnen den geteilten Link (oder geben den Trip-Code ein) und
-   sehen alle Clips gemeinsam.
-
-> Der `anon`-Key darf öffentlich im Repo stehen — er ist durch die Datenbank-Policies
-> geschützt. **Niemals** den `service_role`-Key verwenden.
-
-## Optional: Musik fürs Recap
-
-Lege eine `assets/music.mp3` ab (nur lizenzfreie Musik verwenden). Ist die Datei
-vorhanden und der „Musik"-Schalter an, läuft sie als Hintergrund über das Recap.
+- **Tagebuch erstellen**: Name, Farbe und Bausteine wählen (mind. einer).
+- **Heute**: Für jeden Baustein deines Tagebuchs kannst du täglich einen
+  Eintrag machen:
+  - *Gesicht* / *Körper*: Foto aufnehmen oder aus der Galerie wählen.
+  - *Mentale Gesundheit*: Text schreiben **oder** eine Sprachnachricht
+    aufnehmen.
+- **Verlauf**: Rasteransicht der letzten Tage, tippen zeigt/bearbeitet den
+  jeweiligen Tag rückwirkend.
+- **Streak** 🔥: Zählt aufeinanderfolgende Tage, an denen alle Bausteine
+  eines Tagebuchs ausgefüllt wurden.
+- Über das ⚙-Symbol im Tagebuch kannst du es umbenennen oder löschen.
 
 ## Dateien
 
@@ -45,16 +47,12 @@ vorhanden und der „Musik"-Schalter an, läuft sie als Hintergrund über das Re
 |-------|-------|
 | `index.html` | App-Shell / alle Screens |
 | `styles.css` | Styling |
-| `app.js` | Logik + Backend-Abstraktion (Supabase **oder** lokaler Demo-Modus) |
-| `config.js` | Deine Supabase-Zugangsdaten |
-| `supabase-setup.sql` | Datenbank-Setup (einmal ausführen) |
-| `manifest.json`, `sw.js` | PWA (Installierbarkeit) |
-| `concept-prototype.html` | Der ursprüngliche Klick-Prototyp (nur zur Ansicht) |
+| `app.js` | Logik + lokale Datenhaltung (IndexedDB + localStorage) |
+| `manifest.json`, `sw.js` | PWA (Installierbarkeit, Offline-Start) |
 
 ## Grenzen des MVP (bewusst einfach gehalten)
 
-- Kein echtes „KI-Schneiden": Das Recap reiht Clips chronologisch aneinander,
-  mit Titelkarte, Labels und optionaler Musik. Smarte Auswahl/Beat-Sync ist v2.
-- Offene Policies (jeder mit Link kann lesen/schreiben) — ok für Freundesgruppe,
-  vor öffentlichem Launch absichern.
-- Supabase Free-Tier hat begrenzten Speicher/Traffic — kurze Clips empfehlen.
+- Kein Cloud-Sync zwischen Geräten — bewusst, wegen sensibler Fotos.
+- Bausteine eines Tagebuchs lassen sich nach dem Anlegen aktuell nicht mehr
+  ändern (nur umbenennen/löschen). Neu anlegen, falls sich das ändern soll.
+- Ein Eintrag pro Baustein und Tag (neuer Eintrag ersetzt den alten).
