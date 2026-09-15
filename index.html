@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
-<meta name="theme-color" content="#ff5e9c" />
+<meta name="theme-color" content="#0f8b7f" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <link rel="manifest" href="manifest.json" />
@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
-<title>Tripp — Urlaubsvideos mit Freunden</title>
+<title>Mosaik — Dein modulares Tagebuch</title>
 </head>
 <body>
 <div id="app">
@@ -21,190 +21,162 @@
   <!-- ===== LANDING ===== -->
   <section class="screen active" id="landing">
     <div class="scroll">
-      <div class="float" style="top:64px;left:30px">✈️</div>
-      <div class="float" style="top:128px;right:36px;animation-delay:1.2s">🏝️</div>
-      <div class="float" style="top:250px;left:48px;animation-delay:2.1s">🎬</div>
-      <div class="brandmark"><span class="dot">🌴</span><span class="logo">Tripp</span></div>
-      <h1 class="mt-l">Euer Urlaub.<br/>Ein Video.<br/>Null Schnitt.</h1>
-      <p class="sub mt-s">Sammelt mit Freunden Clips während der Reise — am Ende baut die App automatisch ein Video daraus.</p>
+      <div class="float" style="top:64px;left:30px">🪞</div>
+      <div class="float" style="top:128px;right:36px;animation-delay:1.2s">📓</div>
+      <div class="float" style="top:250px;left:48px;animation-delay:2.1s">✨</div>
+      <div class="brandmark"><span class="dot">🧩</span><span class="logo">Mosaik</span></div>
+      <h1 class="mt-l">Dein Fortschritt.<br/>In deinen<br/>eigenen Bausteinen.</h1>
+      <p class="sub mt-s">Stell dir dein eigenes Tagebuch aus Bausteinen zusammen — Gesicht, Körper, mentale Gesundheit — und halte jeden Tag fest, was dir wichtig ist.</p>
       <div class="steps3">
-        <div class="s"><div class="e">👯</div><div class="t">Crew<br/>einladen</div></div>
-        <div class="s"><div class="e">🎥</div><div class="t">Momente<br/>filmen</div></div>
-        <div class="s"><div class="e">✨</div><div class="t">Video<br/>erhalten</div></div>
+        <div class="s"><div class="e">🧩</div><div class="t">Bausteine<br/>wählen</div></div>
+        <div class="s"><div class="e">📸</div><div class="t">Täglich<br/>festhalten</div></div>
+        <div class="s"><div class="e">📈</div><div class="t">Fortschritt<br/>sehen</div></div>
       </div>
-      <button class="btn mt-l" id="btnCreate">Trip erstellen</button>
-      <button class="btn ghost mt-s" id="btnJoin">Ich habe einen Code</button>
+      <button class="btn mt-l" id="btnStart">Los geht's</button>
+      <p class="muted center mt-s" style="color:rgba(255,255,255,.85)">🔒 Alles bleibt privat auf deinem Gerät.</p>
     </div>
   </section>
 
-  <!-- ===== CREATE ===== -->
-  <section class="screen" id="create">
-    <div class="topbar"><button class="back" data-go="landing">‹</button><b>Neuer Trip</b><span style="width:38px"></span></div>
-    <div class="scroll">
-      <h1>Wohin geht's?</h1>
-      <label class="lbl">Trip-Name</label>
-      <input class="field" id="cName" placeholder="z.B. Mädels-Trip Lissabon" />
-      <label class="lbl">Ziel (optional)</label>
-      <input class="field" id="cDest" placeholder="z.B. Lissabon, Portugal" />
-      <div class="row">
-        <div style="flex:1"><label class="lbl">Von</label><input class="field" id="cStart" type="date" /></div>
-        <div style="flex:1"><label class="lbl">Bis</label><input class="field" id="cEnd" type="date" /></div>
-      </div>
-      <button class="btn mt-l" id="cSubmit">Trip anlegen</button>
-    </div>
-  </section>
-
-  <!-- ===== JOIN ===== -->
-  <section class="screen" id="join">
-    <div class="topbar"><button class="back" data-go="landing">‹</button><b>Beitreten</b><span style="width:38px"></span></div>
-    <div class="scroll">
-      <h1>Hast du einen Code?</h1>
-      <p class="sub mt-s">Gib den Trip-Code ein, den du von deinen Freunden bekommen hast.</p>
-      <input class="field" id="jCode" placeholder="z.B. LISBOA" autocapitalize="characters" style="text-transform:uppercase;font-size:22px;letter-spacing:3px;text-align:center" />
-      <button class="btn mt-l" id="jSubmit">Trip suchen</button>
-    </div>
-  </section>
-
-  <!-- ===== PROFILE (name + emoji) ===== -->
-  <section class="screen" id="profile">
-    <div class="topbar"><button class="back" data-go="landing">‹</button><b id="pTripName">Trip</b><span style="width:38px"></span></div>
-    <div class="scroll">
-      <div class="card mt" id="pWelcome" style="display:none;align-items:center;gap:12px">
-        <div class="avatars" id="pAvatars"></div>
-        <div id="pWelcomeText" style="font-size:14px;font-weight:700;color:var(--ink-soft);line-height:1.35"></div>
-      </div>
-      <h1 class="mt">Wer bist du?</h1>
-      <p class="sub mt-s">So tauchst du im Feed auf.</p>
-      <label class="lbl">Dein Name</label>
-      <input class="field" id="pName" placeholder="z.B. Mia" />
-      <label class="lbl">Wähle dein Avatar</label>
-      <div class="emoji-grid" id="emojiGrid"></div>
-      <button class="btn mt-l" id="pSubmit">Los geht's! 🎉</button>
-    </div>
-  </section>
-
-  <!-- ===== FEED ===== -->
-  <section class="screen" id="feed">
+  <!-- ===== HOME (Tagebuch-Liste) ===== -->
+  <section class="screen" id="home">
     <div class="scroll">
       <div class="feedhead">
         <div>
-          <span class="daychip" id="feedDay">DEINE REISE</span>
-          <h1 id="feedTitle" class="mt-s" style="font-size:25px">Trip</h1>
+          <span class="daychip" id="homeDate">HEUTE</span>
+          <h1 class="mt-s" style="font-size:25px">Deine Tagebücher</h1>
         </div>
-        <div class="avatars" id="feedAvatars"></div>
       </div>
 
-      <div class="card prompt mt">
-        <span class="pill">⏰ HEUTE</span>
-        <h2 class="mt-s" id="challengeText">Fang den Sonnenuntergang ein 🌅</h2>
-        <p class="mt-s" style="opacity:.92;font-size:14px" id="challengeSub">Tippe ＋ und film deinen Moment.</p>
+      <div class="grid diaries mt-l" id="diaryList"></div>
+      <div class="empty hidden" id="homeEmpty"><span class="e">🧩</span>Noch kein Tagebuch angelegt.<br/>Tippe auf ＋ und stell dir eins aus Bausteinen zusammen.</div>
+    </div>
+    <button class="fab" id="fabNewDiary">＋</button>
+  </section>
+
+  <!-- ===== CREATE DIARY ===== -->
+  <section class="screen" id="createDiary">
+    <div class="topbar"><button class="back" data-go="home">‹</button><b>Neues Tagebuch</b><span style="width:38px"></span></div>
+    <div class="scroll">
+      <h1>Wie soll's heißen?</h1>
+      <label class="lbl">Name des Tagebuchs</label>
+      <input class="field" id="dName" placeholder="z.B. Haut-Tracking" />
+
+      <label class="lbl">Farbe</label>
+      <div class="color-grid" id="colorGrid"></div>
+
+      <label class="lbl">Bausteine auswählen</label>
+      <p class="muted mt-s" style="margin-top:2px">Wähle mindestens einen Baustein für dieses Tagebuch.</p>
+      <div class="block-list mt-s" id="blockPicker"></div>
+
+      <button class="btn mt-l" id="dSubmit" disabled>Tagebuch erstellen</button>
+    </div>
+  </section>
+
+  <!-- ===== DIARY DETAIL ===== -->
+  <section class="screen" id="diary">
+    <div class="topbar">
+      <button class="back" data-go="home">‹</button>
+      <b id="diaryTitle">Tagebuch</b>
+      <button class="back" id="btnDiarySettings">⚙</button>
+    </div>
+    <div class="scroll">
+      <div class="card prompt mt" id="diaryHero">
+        <span class="pill" id="diaryStreak">🔥 0 Tage</span>
+        <h2 class="mt-s" id="diarySub">0 von 0 Bausteinen heute erledigt</h2>
       </div>
+
+      <div class="sec mt-l"><h2>Heute</h2></div>
+      <div id="todayBlocks" class="mt-s"></div>
 
       <div class="sec mt-l">
-        <h2>Die Reise bisher</h2>
-        <button class="btn ghost sm" id="btnRefresh">↻ Aktualisieren</button>
+        <h2>Verlauf</h2>
+        <span class="cnt" id="historyCount"></span>
       </div>
-
-      <div class="grid" id="clipGrid"></div>
-      <div class="empty hidden" id="feedEmpty"><span class="e">🎬</span>Noch keine Clips.<br/>Sei die*der Erste — tippe auf ＋</div>
-
-      <button class="btn mt-l" id="btnRecap">✨ Recap-Video erstellen</button>
-      <button class="btn ghost mt-s sm" id="btnShare" style="width:100%">🔗 Freunde einladen (Code <b id="shareCode"></b>)</button>
-    </div>
-    <button class="fab" id="fab">＋</button>
-    <div class="nav">
-      <button class="item on"><span class="ic">🏠</span>Feed</button>
-      <button class="item" id="navRecap"><span class="ic">🎬</span>Recap</button>
-      <span style="width:64px"></span>
-      <button class="item" id="navShare"><span class="ic">🔗</span>Einladen</button>
-      <button class="item" id="navLeave"><span class="ic">🚪</span>Wechseln</button>
+      <div class="daygrid mt-s" id="historyGrid"></div>
+      <div class="empty hidden" id="historyEmpty"><span class="e">📅</span>Noch keine Einträge — leg heute los!</div>
     </div>
   </section>
 
-  <!-- ===== CAPTURE ===== -->
-  <section class="screen" id="capture">
-    <div class="topbar"><button class="back" data-go="feed">‹</button><b>Clip hinzufügen</b><span style="width:38px"></span></div>
+  <!-- ===== PHOTO ENTRY ===== -->
+  <section class="screen" id="entryPhoto">
+    <div class="topbar"><button class="back" id="btnPhotoBack">‹</button><b id="photoTitle">Foto</b><span style="width:38px"></span></div>
     <div class="scroll">
-      <input type="file" id="fileCam" accept="video/*" capture="environment" class="hidden" />
-      <input type="file" id="fileGal" accept="video/*" class="hidden" />
+      <input type="file" id="fileCam" accept="image/*" capture="user" class="hidden" />
+      <input type="file" id="fileGal" accept="image/*" class="hidden" />
 
-      <div id="captureChoice">
-        <div class="card prompt"><span class="pill">🌅 HEUTE</span><h2 class="mt-s" id="capChallenge">Sonnenuntergang</h2></div>
+      <div id="photoChoice">
+        <div class="card prompt"><span class="pill" id="photoPill">📸 HEUTE</span><h2 class="mt-s" id="photoPrompt">Foto hinzufügen</h2></div>
         <div class="choice-tiles">
-          <div class="tile" id="btnRecord"><div class="e">🎥</div><div class="t">Aufnehmen</div><div class="d">mit der Kamera</div></div>
-          <div class="tile" id="btnGallery"><div class="e">🖼️</div><div class="t">Galerie</div><div class="d">Clip auswählen</div></div>
+          <div class="tile" id="btnPhotoCam"><div class="e">🤳</div><div class="t">Aufnehmen</div><div class="d">mit der Kamera</div></div>
+          <div class="tile" id="btnPhotoGal"><div class="e">🖼️</div><div class="t">Galerie</div><div class="d">Foto auswählen</div></div>
         </div>
-        <p class="muted center mt-l">Tipp: kurze Clips (5–20 Sek.) machen das beste Recap.</p>
+        <div id="photoExistingWrap" class="hidden mt-l">
+          <p class="lbl">Bereits gespeichert</p>
+          <div class="preview-box sm mt-s"><img id="photoExisting" alt="" /></div>
+          <button class="btn ghost mt-s" id="btnPhotoDelete">Eintrag löschen</button>
+        </div>
       </div>
 
-      <div id="captureUpload" class="hidden">
-        <div class="preview-box"><video id="capPreview" playsinline muted controls></video></div>
-        <label class="lbl">Kurze Beschreibung (optional)</label>
-        <input class="field" id="capCaption" placeholder="z.B. Sonnenuntergang am Strand" />
-        <div class="uploadbar hidden" id="capBar"><i></i></div>
-        <button class="btn mt-l" id="btnUpload">Hochladen & teilen</button>
-        <button class="btn ghost mt-s" id="btnRetake">Anderen Clip wählen</button>
+      <div id="photoUpload" class="hidden">
+        <div class="preview-box"><img id="photoPreview" alt="" /></div>
+        <button class="btn mt-l" id="btnPhotoSave">Speichern</button>
+        <button class="btn ghost mt-s" id="btnPhotoRetake">Anderes Foto wählen</button>
       </div>
     </div>
   </section>
 
-  <!-- ===== RECAP ===== -->
-  <section class="screen" id="recap">
-    <div class="topbar"><button class="back" data-go="feed">‹</button><b>Recap-Video</b><span style="width:38px"></span></div>
+  <!-- ===== MIND ENTRY (Text / Sprachnachricht) ===== -->
+  <section class="screen" id="entryMind">
+    <div class="topbar"><button class="back" id="btnMindBack">‹</button><b id="mindTitle">Mentale Gesundheit</b><span style="width:38px"></span></div>
     <div class="scroll">
-      <div class="recap-cover">
-        <div class="big">🎞️</div>
-        <h2 id="recapTitle">Euer Reise-Video</h2>
-        <p class="mt-s" id="recapInfo" style="opacity:.95;font-size:14px">Alle Clips werden zu einem Video zusammengefügt.</p>
+      <div class="tabs mt" id="mindTabs">
+        <button class="tab on" data-tab="text">✍️ Text</button>
+        <button class="tab" data-tab="audio">🎙️ Sprachnachricht</button>
       </div>
 
-      <div class="card mt toggle">
-        <div><b>Musik</b><div class="muted">Hintergrundmusik (falls hinterlegt)</div></div>
-        <div class="switch on" id="swMusic"><i></i></div>
-      </div>
-      <div class="card mt toggle">
-        <div><b>Titelkarte</b><div class="muted">Intro mit Trip-Name zeigen</div></div>
-        <div class="switch on" id="swTitle"><i></i></div>
+      <div id="mindTextPane" class="mt-l">
+        <label class="lbl">Wie geht's dir heute?</label>
+        <textarea class="field textarea" id="mindText" rows="7" placeholder="Schreib auf, was dich beschäftigt…"></textarea>
+        <button class="btn mt-l" id="btnMindTextSave">Speichern</button>
       </div>
 
-      <button class="btn mt-l" id="btnPlayRecap">▶ Recap abspielen</button>
-      <p class="muted center mt">Spielt alle Clips automatisch hintereinander ab — wie ein fertiges Video.</p>
+      <div id="mindAudioPane" class="mt-l hidden">
+        <div class="record-box">
+          <div class="rec-timer" id="recTimer">00:00</div>
+          <button class="rec-btn" id="btnRecToggle"><span id="recIcon">🎙️</span></button>
+          <p class="muted center mt-s" id="recHint">Tippe zum Aufnehmen</p>
+        </div>
+        <div id="audioResultWrap" class="hidden mt-l">
+          <audio id="audioPlayback" controls style="width:100%"></audio>
+          <button class="btn mt-l" id="btnMindAudioSave">Speichern</button>
+          <button class="btn ghost mt-s" id="btnAudioRedo">Neu aufnehmen</button>
+        </div>
+      </div>
+
+      <div id="mindExistingWrap" class="hidden mt-l">
+        <button class="btn ghost" id="btnMindDelete">Heutigen Eintrag löschen</button>
+      </div>
     </div>
   </section>
 
-  <!-- ===== RECAP PLAYER (overlay) ===== -->
-  <div class="player-wrap" id="playerWrap">
-    <div class="progress" id="playerProgress"></div>
-    <div class="player-top">
-      <button class="player-x" id="playerClose">✕</button>
-      <button class="player-x" id="playerPause" style="width:auto;padding:0 14px;border-radius:20px">⏸</button>
-    </div>
-    <video id="recapVideo" playsinline></video>
-    <div class="player-overlay">
-      <div class="label" id="recapLabel"></div>
-    </div>
-    <div class="titlecard" id="recapTitleCard">
-      <div style="font-size:60px">🌴</div>
-      <h1 id="tcName" style="color:#fff;font-size:34px;margin-top:8px"></h1>
-      <p id="tcSub" style="opacity:.92;margin-top:6px"></p>
-    </div>
-    <div class="titlecard hide" id="recapEndCard">
-      <div style="font-size:56px">🎉</div>
-      <h1 style="color:#fff;font-size:29px;margin-top:6px">Euer Recap steht!</h1>
-      <p id="endStats" style="opacity:.94;margin-top:6px"></p>
-      <div style="width:100%;max-width:330px;margin-top:26px">
-        <button class="btn" id="btnShareRecap" style="background:#fff;color:#211d33;box-shadow:0 12px 28px -12px rgba(0,0,0,.5)">📲 Teilen & Freunde einladen</button>
-        <button class="btn ghost mt-s" id="btnReplayRecap" style="background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.34)">↻ Nochmal ansehen</button>
-        <button id="btnCloseEnd" style="background:none;border:none;color:rgba(255,255,255,.85);font-weight:700;font-family:inherit;font-size:15px;margin-top:16px;cursor:pointer">Schließen</button>
-      </div>
-    </div>
-  </div>
+  <!-- ===== DAY VIEW ===== -->
+  <section class="screen" id="dayView">
+    <div class="topbar"><button class="back" data-go="diary">‹</button><b id="dayViewTitle">Tag</b><span style="width:38px"></span></div>
+    <div class="scroll" id="dayViewContent"></div>
+  </section>
 
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script src="config.js"></script>
+<div class="sheet-wrap" id="diarySheet">
+  <div class="sheet-card">
+    <button class="sheet-item" id="sheetRename">✏️ Umbenennen</button>
+    <button class="sheet-item danger" id="sheetDelete">🗑️ Tagebuch löschen</button>
+    <button class="sheet-item cancel" id="sheetCancel">Abbrechen</button>
+  </div>
+</div>
+
 <script type="module" src="app.js"></script>
 </body>
 </html>

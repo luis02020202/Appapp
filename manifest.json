@@ -1,11 +1,11 @@
 {
-  "name": "Tripp — Urlaubsvideos mit Freunden",
-  "short_name": "Tripp",
-  "description": "Sammelt gemeinsam Urlaubs-Clips und macht daraus automatisch ein Video.",
+  "name": "Mosaik — Dein modulares Tagebuch",
+  "short_name": "Mosaik",
+  "description": "Stell dir dein eigenes Tagebuch aus Bausteinen zusammen: Gesicht, Körper, mentale Gesundheit. Alles bleibt lokal auf deinem Gerät.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1a1530",
-  "theme_color": "#ff5e9c",
+  "background_color": "#14524d",
+  "theme_color": "#0f8b7f",
   "orientation": "portrait",
   "icons": [
     { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
