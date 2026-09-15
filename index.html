@@ -3,165 +3,186 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
-<meta name="theme-color" content="#0f8b7f" />
+<meta name="theme-color" content="#F2F2F7" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="assets/icon.svg" />
 <link rel="icon" href="assets/icon.svg" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
-<title>Mosaik — Dein modulares Tagebuch</title>
+<title>Mosaik</title>
 </head>
 <body>
 <div id="app">
 
   <!-- ===== LANDING ===== -->
   <section class="screen active" id="landing">
-    <div class="scroll">
-      <div class="float" style="top:64px;left:30px">🪞</div>
-      <div class="float" style="top:128px;right:36px;animation-delay:1.2s">📓</div>
-      <div class="float" style="top:250px;left:48px;animation-delay:2.1s">✨</div>
-      <div class="brandmark"><span class="dot">🧩</span><span class="logo">Mosaik</span></div>
-      <h1 class="mt-l">Dein Fortschritt.<br/>In deinen<br/>eigenen Bausteinen.</h1>
-      <p class="sub mt-s">Stell dir dein eigenes Tagebuch aus Bausteinen zusammen — Gesicht, Körper, mentale Gesundheit — und halte jeden Tag fest, was dir wichtig ist.</p>
-      <div class="steps3">
-        <div class="s"><div class="e">🧩</div><div class="t">Bausteine<br/>wählen</div></div>
-        <div class="s"><div class="e">📸</div><div class="t">Täglich<br/>festhalten</div></div>
-        <div class="s"><div class="e">📈</div><div class="t">Fortschritt<br/>sehen</div></div>
+    <div class="scroll landing-scroll">
+      <div class="landing-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/>
+          <rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/>
+        </svg>
       </div>
-      <button class="btn mt-l" id="btnStart">Los geht's</button>
-      <p class="muted center mt-s" style="color:rgba(255,255,255,.85)">🔒 Alles bleibt privat auf deinem Gerät.</p>
+      <h1 class="landing-title">Mosaik</h1>
+      <p class="landing-sub">Stell dir dein eigenes Tagebuch aus Bausteinen zusammen und halte jeden Tag fest, was dir wichtig ist.</p>
+
+      <div class="landing-features">
+        <div class="feature-row"><div class="row-glyph sm" style="background:#007AFF" data-icon="face"></div><div class="row-body"><div class="row-title">Gesicht &amp; Körper</div><div class="row-sub">Tägliches Foto, um Fortschritt zu sehen</div></div></div>
+        <div class="feature-row"><div class="row-glyph sm" style="background:#AF52DE" data-icon="mind"></div><div class="row-body"><div class="row-title">Mentale Gesundheit</div><div class="row-sub">Text oder Sprachnachricht</div></div></div>
+        <div class="feature-row"><div class="row-glyph sm" style="background:#8E8E93" data-icon="check"></div><div class="row-body"><div class="row-title">Privat &amp; lokal</div><div class="row-sub">Bleibt nur auf deinem iPhone</div></div></div>
+      </div>
+
+      <button class="btn-primary mt-l" id="btnStart">Los geht's</button>
     </div>
   </section>
 
   <!-- ===== HOME (Tagebuch-Liste) ===== -->
   <section class="screen" id="home">
-    <div class="scroll">
-      <div class="feedhead">
-        <div>
-          <span class="daychip" id="homeDate">HEUTE</span>
-          <h1 class="mt-s" style="font-size:25px">Deine Tagebücher</h1>
-        </div>
-      </div>
-
-      <div class="grid diaries mt-l" id="diaryList"></div>
-      <div class="empty hidden" id="homeEmpty"><span class="e">🧩</span>Noch kein Tagebuch angelegt.<br/>Tippe auf ＋ und stell dir eins aus Bausteinen zusammen.</div>
+    <div class="navbar">
+      <span class="nav-side"></span>
+      <h1 class="nav-title">Tagebücher</h1>
+      <button class="nav-btn" id="fabNewDiary" data-icon="plus"></button>
     </div>
-    <button class="fab" id="fabNewDiary">＋</button>
+    <div class="scroll">
+      <p class="date-caption" id="homeDate"></p>
+      <div class="list-group mt-s" id="diaryList"></div>
+      <div class="empty hidden" id="homeEmpty">Noch kein Tagebuch angelegt.<br/>Tippe oben rechts auf ＋ und stell dir eins aus Bausteinen zusammen.</div>
+    </div>
   </section>
 
   <!-- ===== CREATE DIARY ===== -->
   <section class="screen" id="createDiary">
-    <div class="topbar"><button class="back" data-go="home">‹</button><b>Neues Tagebuch</b><span style="width:38px"></span></div>
+    <div class="navbar">
+      <button class="nav-btn back" data-go="home" data-icon="chevronLeft"></button>
+      <h1 class="nav-title">Neues Tagebuch</h1>
+      <span class="nav-side"></span>
+    </div>
     <div class="scroll">
-      <h1>Wie soll's heißen?</h1>
-      <label class="lbl">Name des Tagebuchs</label>
+      <p class="section-header">Name</p>
       <input class="field" id="dName" placeholder="z.B. Haut-Tracking" />
 
-      <label class="lbl">Farbe</label>
+      <p class="section-header mt-l">Farbe</p>
       <div class="color-grid" id="colorGrid"></div>
 
-      <label class="lbl">Bausteine auswählen</label>
-      <p class="muted mt-s" style="margin-top:2px">Wähle mindestens einen Baustein für dieses Tagebuch.</p>
-      <div class="block-list mt-s" id="blockPicker"></div>
-
-      <button class="btn mt-l" id="dSubmit" disabled>Tagebuch erstellen</button>
+      <p class="section-header mt-l">Bausteine</p>
+      <p class="field-hint">Wähle mindestens einen Baustein für dieses Tagebuch.</p>
+      <div class="list-group mt-s" id="blockPicker"></div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn-primary" id="dSubmit" disabled>Tagebuch erstellen</button>
     </div>
   </section>
 
   <!-- ===== DIARY DETAIL ===== -->
   <section class="screen" id="diary">
-    <div class="topbar">
-      <button class="back" data-go="home">‹</button>
-      <b id="diaryTitle">Tagebuch</b>
-      <button class="back" id="btnDiarySettings">⚙</button>
+    <div class="navbar">
+      <button class="nav-btn back" data-go="home" data-icon="chevronLeft"></button>
+      <h1 class="nav-title" id="diaryTitle">Tagebuch</h1>
+      <button class="nav-btn" id="btnDiarySettings" data-icon="more"></button>
     </div>
     <div class="scroll">
-      <div class="card prompt mt" id="diaryHero">
-        <span class="pill" id="diaryStreak">🔥 0 Tage</span>
-        <h2 class="mt-s" id="diarySub">0 von 0 Bausteinen heute erledigt</h2>
+      <div class="diary-hero">
+        <span class="streak-line" id="diaryStreak"></span>
+        <p class="diary-sub" id="diarySub">0 von 0 Bausteinen heute erledigt</p>
       </div>
 
-      <div class="sec mt-l"><h2>Heute</h2></div>
-      <div id="todayBlocks" class="mt-s"></div>
+      <p class="section-header">Heute</p>
+      <div class="list-group" id="todayBlocks"></div>
 
-      <div class="sec mt-l">
-        <h2>Verlauf</h2>
-        <span class="cnt" id="historyCount"></span>
+      <div class="section-header-row mt-l">
+        <p class="section-header">Verlauf</p>
+        <span class="section-count" id="historyCount"></span>
       </div>
-      <div class="daygrid mt-s" id="historyGrid"></div>
-      <div class="empty hidden" id="historyEmpty"><span class="e">📅</span>Noch keine Einträge — leg heute los!</div>
+      <div class="daygrid" id="historyGrid"></div>
+      <div class="empty hidden" id="historyEmpty">Noch keine Einträge — leg heute los!</div>
     </div>
   </section>
 
   <!-- ===== PHOTO ENTRY ===== -->
   <section class="screen" id="entryPhoto">
-    <div class="topbar"><button class="back" id="btnPhotoBack">‹</button><b id="photoTitle">Foto</b><span style="width:38px"></span></div>
+    <div class="navbar">
+      <button class="nav-btn back" id="btnPhotoBack" data-icon="chevronLeft"></button>
+      <h1 class="nav-title" id="photoTitle">Foto</h1>
+      <span class="nav-side"></span>
+    </div>
     <div class="scroll">
       <input type="file" id="fileCam" accept="image/*" capture="user" class="hidden" />
       <input type="file" id="fileGal" accept="image/*" class="hidden" />
 
       <div id="photoChoice">
-        <div class="card prompt"><span class="pill" id="photoPill">📸 HEUTE</span><h2 class="mt-s" id="photoPrompt">Foto hinzufügen</h2></div>
+        <p class="date-caption" id="photoPill">Heute</p>
+        <h2 class="entry-prompt" id="photoPrompt">Foto hinzufügen</h2>
         <div class="choice-tiles">
-          <div class="tile" id="btnPhotoCam"><div class="e">🤳</div><div class="t">Aufnehmen</div><div class="d">mit der Kamera</div></div>
-          <div class="tile" id="btnPhotoGal"><div class="e">🖼️</div><div class="t">Galerie</div><div class="d">Foto auswählen</div></div>
+          <div class="tile" id="btnPhotoCam"><div class="tile-icon" data-icon="camera"></div><div class="t">Aufnehmen</div><div class="d">Kamera</div></div>
+          <div class="tile" id="btnPhotoGal"><div class="tile-icon" data-icon="gallery"></div><div class="t">Galerie</div><div class="d">Foto wählen</div></div>
         </div>
         <div id="photoExistingWrap" class="hidden mt-l">
-          <p class="lbl">Bereits gespeichert</p>
+          <p class="section-header">Bereits gespeichert</p>
           <div class="preview-box sm mt-s"><img id="photoExisting" alt="" /></div>
-          <button class="btn ghost mt-s" id="btnPhotoDelete">Eintrag löschen</button>
+          <button class="btn-text danger mt-s" id="btnPhotoDelete">Eintrag löschen</button>
         </div>
       </div>
 
       <div id="photoUpload" class="hidden">
         <div class="preview-box"><img id="photoPreview" alt="" /></div>
-        <button class="btn mt-l" id="btnPhotoSave">Speichern</button>
-        <button class="btn ghost mt-s" id="btnPhotoRetake">Anderes Foto wählen</button>
+        <button class="btn-text mt-s" id="btnPhotoRetake">Anderes Foto wählen</button>
       </div>
+    </div>
+    <div class="bottom-bar hidden" id="photoSaveBar">
+      <button class="btn-primary" id="btnPhotoSave">Speichern</button>
     </div>
   </section>
 
   <!-- ===== MIND ENTRY (Text / Sprachnachricht) ===== -->
   <section class="screen" id="entryMind">
-    <div class="topbar"><button class="back" id="btnMindBack">‹</button><b id="mindTitle">Mentale Gesundheit</b><span style="width:38px"></span></div>
+    <div class="navbar">
+      <button class="nav-btn back" id="btnMindBack" data-icon="chevronLeft"></button>
+      <h1 class="nav-title" id="mindTitle">Mentale Gesundheit</h1>
+      <span class="nav-side"></span>
+    </div>
     <div class="scroll">
-      <div class="tabs mt" id="mindTabs">
-        <button class="tab on" data-tab="text">✍️ Text</button>
-        <button class="tab" data-tab="audio">🎙️ Sprachnachricht</button>
+      <div class="segmented" id="mindTabs">
+        <button class="tab on" data-tab="text">Text</button>
+        <button class="tab" data-tab="audio">Sprachnachricht</button>
       </div>
 
       <div id="mindTextPane" class="mt-l">
-        <label class="lbl">Wie geht's dir heute?</label>
-        <textarea class="field textarea" id="mindText" rows="7" placeholder="Schreib auf, was dich beschäftigt…"></textarea>
-        <button class="btn mt-l" id="btnMindTextSave">Speichern</button>
+        <textarea class="field textarea" id="mindText" rows="7" placeholder="Wie geht's dir heute?"></textarea>
       </div>
 
       <div id="mindAudioPane" class="mt-l hidden">
         <div class="record-box">
           <div class="rec-timer" id="recTimer">00:00</div>
-          <button class="rec-btn" id="btnRecToggle"><span id="recIcon">🎙️</span></button>
-          <p class="muted center mt-s" id="recHint">Tippe zum Aufnehmen</p>
+          <button class="rec-btn" id="btnRecToggle">
+            <svg class="icon rec-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3.2" width="6" height="11" rx="3"/><path d="M5.2 11a6.8 6.8 0 0013.6 0"/><path d="M12 17.8v3"/><path d="M9 21h6"/></svg>
+            <svg class="icon rec-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7.5" y="7.5" width="9" height="9" rx="1.8"/></svg>
+          </button>
+          <p class="rec-hint" id="recHint">Tippe zum Aufnehmen</p>
         </div>
         <div id="audioResultWrap" class="hidden mt-l">
           <audio id="audioPlayback" controls style="width:100%"></audio>
-          <button class="btn mt-l" id="btnMindAudioSave">Speichern</button>
-          <button class="btn ghost mt-s" id="btnAudioRedo">Neu aufnehmen</button>
+          <button class="btn-text mt-s" id="btnAudioRedo">Neu aufnehmen</button>
         </div>
       </div>
 
       <div id="mindExistingWrap" class="hidden mt-l">
-        <button class="btn ghost" id="btnMindDelete">Heutigen Eintrag löschen</button>
+        <button class="btn-text danger" id="btnMindDelete">Heutigen Eintrag löschen</button>
       </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn-primary hidden" id="btnMindTextSave">Speichern</button>
+      <button class="btn-primary hidden" id="btnMindAudioSave">Speichern</button>
     </div>
   </section>
 
   <!-- ===== DAY VIEW ===== -->
   <section class="screen" id="dayView">
-    <div class="topbar"><button class="back" data-go="diary">‹</button><b id="dayViewTitle">Tag</b><span style="width:38px"></span></div>
+    <div class="navbar">
+      <button class="nav-btn back" data-go="diary" data-icon="chevronLeft"></button>
+      <h1 class="nav-title" id="dayViewTitle">Tag</h1>
+      <span class="nav-side"></span>
+    </div>
     <div class="scroll" id="dayViewContent"></div>
   </section>
 
@@ -170,11 +191,11 @@
 <div class="toast" id="toast"></div>
 
 <div class="sheet-wrap" id="diarySheet">
-  <div class="sheet-card">
-    <button class="sheet-item" id="sheetRename">✏️ Umbenennen</button>
-    <button class="sheet-item danger" id="sheetDelete">🗑️ Tagebuch löschen</button>
-    <button class="sheet-item cancel" id="sheetCancel">Abbrechen</button>
+  <div class="sheet-group">
+    <button class="sheet-item" id="sheetRename"><span data-icon="pencil"></span>Umbenennen</button>
+    <button class="sheet-item danger" id="sheetDelete"><span data-icon="trash"></span>Tagebuch löschen</button>
   </div>
+  <button class="sheet-item cancel" id="sheetCancel">Abbrechen</button>
 </div>
 
 <script type="module" src="app.js"></script>
