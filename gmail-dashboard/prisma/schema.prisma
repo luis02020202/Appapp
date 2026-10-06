@@ -1,0 +1,187 @@
+// Gmail Intelligence & Cleanup Dashboard — local data model.
+//
+// Portability notes (SQLite → PostgreSQL):
+// - No SQLite-specific types are used; enum-like fields are plain strings
+//   validated in application code (see src/lib/sync/constants.ts).
+// - Labels are a normalized join table instead of a scalar list, which works
+//   identically on both databases and keeps label filters index-friendly.
+// - To migrate: change `provider` to "postgresql", point DATABASE_URL at the
+//   server and create a fresh migration history.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// The connected Google account. The app is single-user, but every row is
+/// scoped by accountId so multiple accounts can be supported later.
+model Account {
+  id    String @id @default(cuid())
+  email String @unique
+
+  /// AES-256-GCM encrypted (see src/lib/crypto.ts). Never stored in plaintext.
+  accessTokenEnc       String?
+  refreshTokenEnc      String?
+  accessTokenExpiresAt DateTime?
+  /// Space-separated OAuth scopes Google actually granted.
+  scopes               String    @default("")
+  /// Set when Google rejects the refresh token (revoked, expired, password change).
+  needsReauth          Boolean   @default(false)
+  authError            String?
+
+  /// Gmail history checkpoint for incremental sync. Only advanced after the
+  /// corresponding changes are persisted locally.
+  historyId              String?
+  initialSyncCompletedAt DateTime?
+  lastSyncAt             DateTime?
+  /// Gmail's own count from users.getProfile, used as the progress estimate.
+  gmailMessagesTotal     Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+  labels   Label[]
+  syncRuns SyncRun[]
+}
+
+model Label {
+  accountId      String
+  gmailId        String
+  name           String
+  type           String // "system" | "user"
+  messagesTotal  Int?
+  messagesUnread Int?
+  updatedAt      DateTime @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@id([accountId, gmailId])
+}
+
+/// Normalized metadata for one Gmail message. Bodies are never stored.
+model Message {
+  /// Gmail message id.
+  id        String @id
+  threadId  String
+  accountId String
+
+  senderName       String?
+  senderEmail      String?
+  /// Full host of the sender address, e.g. "mail.example.co.uk".
+  senderDomain     String?
+  /// Registrable domain, e.g. "example.co.uk" (used for domain grouping).
+  senderRootDomain String?
+  subject          String?
+  /// From Gmail's internalDate (when Gmail received the message).
+  receivedAt       DateTime?
+  snippet          String?
+  sizeEstimate     Int?
+  hasAttachments   Boolean   @default(false)
+
+  // Derived from Gmail labels for fast aggregation.
+  isUnread      Boolean @default(false)
+  isStarred     Boolean @default(false)
+  isImportant   Boolean @default(false)
+  isInInbox     Boolean @default(false)
+  isSent        Boolean @default(false)
+  isDraft       Boolean @default(false)
+  /// Gmail tab category: "primary" | "promotions" | "social" | "updates" | "forums".
+  gmailCategory String?
+
+  // Raw list/automation signals used by the classifier (Phase 4/5).
+  listId        String?
+  precedence    String?
+  autoSubmitted String?
+
+  // Unsubscribe (from RFC 2369 / RFC 8058 headers; HTML links in Phase 5).
+  unsubscribeAvailable Boolean @default(false)
+  unsubscribeUrl       String?
+  unsubscribeEmail     String?
+  unsubscribeMailto    String?
+  unsubscribeOneClick  Boolean @default(false)
+
+  // Classification (Phase 4).
+  category                 String?
+  classificationConfidence Float?
+  classificationReason     String?
+  classifiedBy             String? // "rules" | "llm" | "user"
+  analyzedAt               DateTime?
+
+  // Sync bookkeeping.
+  gmailHistoryId    String?
+  metadataFetchedAt DateTime?
+  fetchAttempts     Int       @default(0)
+  lastFetchError    String?
+  /// Set when the message is no longer in the synced mailbox scope. Rows are
+  /// kept so local analysis is never lost. Reason: "deleted" | "trash" | "spam" | "missing".
+  removedAt         DateTime?
+  removedReason     String?
+  lastSeenSyncRunId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account Account        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  labels  MessageLabel[]
+
+  @@index([accountId, receivedAt])
+  @@index([accountId, senderEmail])
+  @@index([accountId, senderRootDomain])
+  @@index([accountId, category])
+  @@index([accountId, isUnread])
+  @@index([accountId, metadataFetchedAt])
+  @@index([accountId, removedAt])
+  @@index([threadId])
+}
+
+model MessageLabel {
+  messageId String
+  /// Gmail label id (e.g. "INBOX", "Label_123").
+  labelId   String
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, labelId])
+  @@index([labelId])
+}
+
+model SyncRun {
+  id         String    @id @default(cuid())
+  accountId  String
+  /// "full" | "incremental"
+  mode       String
+  /// "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "interrupted"
+  status     String
+  /// "starting" | "labels" | "listing" | "history" | "metadata" | "attachments" | "finalizing" | "done"
+  phase      String    @default("starting")
+  discovered Int       @default(0)
+  processed  Int       @default(0)
+  toProcess  Int       @default(0)
+  errorCount Int       @default(0)
+  lastError  String?
+  startedAt  DateTime  @default(now())
+  heartbeatAt DateTime @default(now())
+  finishedAt DateTime?
+
+  account Account     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  errors  SyncError[]
+
+  @@index([accountId, startedAt])
+}
+
+model SyncError {
+  id        Int      @id @default(autoincrement())
+  syncRunId String
+  messageId String?
+  message   String
+  createdAt DateTime @default(now())
+
+  syncRun SyncRun @relation(fields: [syncRunId], references: [id], onDelete: Cascade)
+
+  @@index([syncRunId])
+}
